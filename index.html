@@ -5,731 +5,194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zero Waste Near Me — Find Refill Shops in the UK</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --amber:   #ffbb53;
-  --amber-d: #f0a830;
-  --mint:    #00d8b5;
-  --mint-d:  #00b89a;
-  --cyan:    #00c1ef;
-  --orange:  #ff7646;
-  --navy:    #04455c;
-  --navy-l:  #0a5a78;
-  --teal:    #1d93a3;
-  --cream:   #fdf8f0;
-  --white:   #ffffff;
-  --text:    #1c2f38;
-  --muted:   #6b8c99;
-  --border:  #e0eff3;
-  --card-bg: #ffffff;
-  --light:   #f4fbfa;
+  --amber:#ffbb53; --amber-d:#f0a830; --mint:#00d8b5; --mint-d:#00b89a;
+  --cyan:#00c1ef; --orange:#ff7646; --navy:#04455c; --navy-l:#0a5a78;
+  --teal:#1d93a3; --white:#fff; --text:#1c2f38; --muted:#6b8c99;
+  --border:#e0eff3; --light:#f4fbfa;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);min-height:100vh}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* HEADER */
+.site-header{background:var(--amber);position:sticky;top:0;z-index:1000;box-shadow:0 2px 16px rgba(4,69,92,.18)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;max-width:1400px;margin:0 auto}
+.site-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(4,69,92,.3)}
+.logo-text{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);line-height:1.1}
+.logo-text span{display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;opacity:.7}
+.site-nav{display:flex;align-items:center;gap:4px}
+.nav-link{font-size:13.5px;font-weight:500;color:var(--navy);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all .18s;opacity:.85}
+.nav-link:hover{background:rgba(4,69,92,.1);opacity:1}
+.nav-link.cta{background:var(--navy);color:var(--amber);margin-left:8px;opacity:1;font-weight:600;padding:8px 18px}
+.nav-link.cta:hover{background:var(--navy-l)}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px}
 
-html { scroll-behavior: smooth; }
+/* HERO */
+.hero{background:var(--navy);position:relative;overflow:hidden;padding:42px 32px 52px}
+.hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(0,216,181,.12) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 10% 80%,rgba(255,187,83,.08) 0%,transparent 60%)}
+.hero-inner{max-width:780px;margin:0 auto;position:relative;text-align:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(0,216,181,.15);border:1px solid rgba(0,216,181,.3);color:var(--mint);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:16px}
+.hero-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:clamp(26px,5vw,44px);color:white;line-height:1.15;margin-bottom:12px}
+.hero-title em{font-style:normal;color:var(--amber)}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.65);margin-bottom:32px;line-height:1.6}
+.search-bar{background:white;border-radius:14px;padding:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.search-field{flex:1;min-width:200px;display:flex;align-items:center;gap:10px;padding:8px 14px;border-right:1px solid var(--border)}
+.search-icon{font-size:18px;opacity:.5}
+.search-input{border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:transparent;width:100%}
+.search-input::placeholder{color:var(--muted)}
+.radius-wrap{padding:8px 14px;border-right:1px solid var(--border)}
+.radius-select{border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:transparent;cursor:pointer}
+.btn-locate{display:flex;align-items:center;gap:6px;padding:10px 16px;border:none;border-radius:10px;background:var(--light);color:var(--navy);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap}
+.btn-locate:hover{background:var(--border)}
+.btn-search{display:flex;align-items:center;gap:6px;padding:10px 22px;border:none;border-radius:10px;background:var(--mint);color:var(--navy);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap}
+.btn-search:hover{background:var(--mint-d);transform:translateY(-1px)}
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--light);
-  color: var(--text);
-  min-height: 100vh;
-}
+/* STATS */
+.stats-strip{background:var(--mint);padding:14px 32px;display:flex;justify-content:center;gap:48px;flex-wrap:wrap}
+.stat{display:flex;align-items:center;gap:8px;color:var(--navy)}
+.stat-num{font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px}
+.stat-label{font-size:13px;font-weight:500;opacity:.8}
 
-/* ══════════════════════════════════════════
-   HEADER
-══════════════════════════════════════════ */
-.site-header {
-  background: var(--amber);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 16px rgba(4,69,92,.18);
-}
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  height: 62px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-.site-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-.logo-icon {
-  width: 36px; height: 36px;
-  background: var(--navy);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(4,69,92,.3);
-}
-.logo-text {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--navy);
-  line-height: 1.1;
-}
-.logo-text span {
-  display: block;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--navy);
-  opacity: .7;
-}
-.site-nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.nav-link {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--navy);
-  text-decoration: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  transition: all .18s;
-  letter-spacing: .2px;
-  opacity: .85;
-}
-.nav-link:hover {
-  background: rgba(4,69,92,.1);
-  opacity: 1;
-}
-.nav-link.cta {
-  background: var(--navy);
-  color: var(--amber);
-  margin-left: 8px;
-  opacity: 1;
-  font-weight: 600;
-  padding: 8px 18px;
-}
-.nav-link.cta:hover {
-  background: var(--navy-l);
-}
-.hamburger {
-  display: none;
-  flex-direction: column; gap: 5px;
-  background: none; border: none; cursor: pointer; padding: 8px;
-}
-.hamburger span {
-  display: block; width: 22px; height: 2px;
-  background: var(--navy); border-radius: 2px; transition: all .2s;
-}
+/* MAP */
+.map-section{position:relative}
+#map{width:100%;height:480px;display:block}
+.map-overlay-badge{position:absolute;bottom:16px;left:16px;background:white;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--navy);box-shadow:0 2px 12px rgba(0,0,0,.15);z-index:500;display:flex;align-items:center;gap:6px}
+.map-dot{width:10px;height:10px;background:var(--mint);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+.leaflet-popup-content-wrapper{border-radius:12px!important;box-shadow:0 6px 24px rgba(0,0,0,.18)!important;border:none!important;padding:0!important;overflow:hidden}
+.leaflet-popup-content{margin:0!important;width:auto!important}
+.popup-card{padding:16px 18px;min-width:220px;max-width:280px}
+.popup-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:var(--navy);margin-bottom:4px}
+.popup-addr{font-size:12px;color:var(--muted);margin-bottom:8px}
+.popup-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.popup-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(0,216,181,.12);color:var(--teal);text-transform:uppercase;letter-spacing:.3px}
+.popup-dist{float:right;font-size:11px;font-weight:700;color:var(--teal);background:rgba(0,193,239,.1);padding:2px 7px;border-radius:10px}
+.popup-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
+.popup-link:hover{color:var(--teal)}
 
-/* ══════════════════════════════════════════
-   HERO SEARCH
-══════════════════════════════════════════ */
-.hero {
-  background: var(--navy);
-  position: relative;
-  overflow: hidden;
-  padding: 42px 32px 52px;
-}
-.hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 60% 80% at 80% 50%, rgba(0,216,181,.12) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(255,187,83,.08) 0%, transparent 60%);
-  pointer-events: none;
-}
-.hero-inner {
-  max-width: 780px;
-  margin: 0 auto;
-  position: relative;
-  text-align: center;
-}
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0,216,181,.15);
-  border: 1px solid rgba(0,216,181,.3);
-  color: var(--mint);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 5px 14px;
-  border-radius: 20px;
-  margin-bottom: 16px;
-}
-.hero-title {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  font-size: clamp(26px, 5vw, 44px);
-  color: white;
-  line-height: 1.15;
-  margin-bottom: 12px;
-}
-.hero-title em {
-  font-style: normal;
-  color: var(--amber);
-}
-.hero-sub {
-  font-size: 15px;
-  color: rgba(255,255,255,.65);
-  margin-bottom: 32px;
-  line-height: 1.6;
-}
+/* DIRECTORY */
+.directory{max-width:1300px;margin:0 auto;padding:44px 28px 60px}
+.directory-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.directory-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--navy)}
+.directory-subtitle{font-size:13px;color:var(--muted);margin-top:3px}
+.result-count{font-size:13px;color:var(--muted);font-weight:500}
+.result-count strong{color:var(--navy)}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.filter-chip{padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .18s}
+.filter-chip:hover{border-color:var(--mint);color:var(--teal)}
+.filter-chip.active{background:var(--navy);border-color:var(--navy);color:white}
 
-/* Search bar */
-.search-bar {
-  background: white;
-  border-radius: 14px;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.25);
-  flex-wrap: wrap;
-}
-.search-field {
-  flex: 1;
-  min-width: 200px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  border-right: 1px solid var(--border);
-}
-.search-icon { font-size: 18px; opacity: .5; }
-.search-input {
-  border: none; outline: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px; color: var(--text);
-  background: transparent;
-  width: 100%;
-}
-.search-input::placeholder { color: var(--muted); }
-.radius-wrap {
-  padding: 8px 14px;
-  border-right: 1px solid var(--border);
-}
-.radius-select {
-  border: none; outline: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; color: var(--text);
-  background: transparent; cursor: pointer;
-}
-.btn-locate {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 16px;
-  border: none; border-radius: 10px;
-  background: var(--light); color: var(--navy);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: all .18s;
-  white-space: nowrap;
-}
-.btn-locate:hover { background: var(--border); }
-.btn-search {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 22px;
-  border: none; border-radius: 10px;
-  background: var(--mint); color: var(--navy);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: all .18s;
-  white-space: nowrap;
-}
-.btn-search:hover { background: var(--mint-d); transform: translateY(-1px); }
+/* CARDS */
+.shops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.shop-card{background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all .22s cubic-bezier(.34,1.3,.64,1);animation:fadeUp .4s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.shop-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(4,69,92,.13);border-color:var(--mint)}
+.shop-card.highlighted{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,118,70,.2)}
+.shop-card-accent{height:5px;background:linear-gradient(90deg,var(--mint),var(--cyan))}
+.shop-card-body{padding:18px 20px}
+.shop-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.shop-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:var(--navy);line-height:1.2}
+.shop-dist{font-size:11px;font-weight:700;color:var(--teal);background:rgba(0,193,239,.1);padding:3px 9px;border-radius:12px;white-space:nowrap;margin-left:8px;flex-shrink:0}
+.shop-address{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.shop-desc{font-size:13px;color:#3a5560;line-height:1.55;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.shop-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.shop-tag{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:rgba(0,216,181,.1);color:var(--teal);border:1px solid rgba(0,216,181,.25);text-transform:uppercase;letter-spacing:.3px}
+.shop-tag.orange{background:rgba(255,118,70,.1);color:var(--orange);border-color:rgba(255,118,70,.25)}
+.shop-tag.blue{background:rgba(0,193,239,.1);color:#0086b3;border-color:rgba(0,193,239,.25)}
+.shop-card-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);background:#fafeff}
+.shop-website{font-size:12px;font-weight:600;color:var(--orange);text-decoration:none;transition:color .15s;display:flex;align-items:center;gap:4px}
+.shop-website:hover{color:var(--teal)}
+.btn-show-map{font-size:12px;font-weight:600;color:var(--navy);background:none;border:1.5px solid var(--border);padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px}
+.btn-show-map:hover{background:var(--mint);color:var(--navy);border-color:var(--mint)}
 
-/* Stats strip */
-.stats-strip {
-  background: var(--mint);
-  padding: 14px 32px;
-  display: flex;
-  justify-content: center;
-  gap: 48px;
-  flex-wrap: wrap;
-}
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--navy);
-}
-.stat-num {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-}
-.stat-label {
-  font-size: 13px;
-  font-weight: 500;
-  opacity: .8;
-}
+/* LOADING / EMPTY */
+.loading-state,.empty-state{text-align:center;padding:60px 20px;color:var(--muted);grid-column:1/-1}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin-bottom:6px}
+.error-banner{background:#fff3f0;border:1.5px solid #ffd0c4;border-radius:10px;padding:14px 20px;margin-bottom:20px;color:#c0392b;font-size:13px;display:none;align-items:center;gap:10px}
+.error-banner.show{display:flex}
 
-/* ══════════════════════════════════════════
-   MAP
-══════════════════════════════════════════ */
-.map-section {
-  position: relative;
-}
-#map {
-  width: 100%;
-  height: 480px;
-  display: block;
-}
-.map-overlay-badge {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  background: white;
-  border-radius: 10px;
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--navy);
-  box-shadow: 0 2px 12px rgba(0,0,0,.15);
-  z-index: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.map-dot {
-  width: 10px; height: 10px;
-  background: var(--mint);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%,100% { transform:scale(1); opacity:1; }
-  50% { transform:scale(1.4); opacity:.7; }
-}
+/* INFO BAND */
+.info-band{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-l) 100%);padding:48px 32px;text-align:center}
+.info-band h2{font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:white;margin-bottom:10px}
+.info-band p{color:rgba(255,255,255,.7);font-size:15px;margin-bottom:24px}
+.btn-cta{display:inline-flex;align-items:center;gap:8px;background:var(--amber);color:var(--navy);font-weight:700;font-size:15px;padding:13px 28px;border-radius:12px;text-decoration:none;transition:all .2s;box-shadow:0 4px 16px rgba(255,187,83,.4)}
+.btn-cta:hover{background:var(--amber-d);transform:translateY(-2px)}
 
-/* Leaflet popup */
-.leaflet-popup-content-wrapper {
-  border-radius: 12px !important;
-  box-shadow: 0 6px 24px rgba(0,0,0,.18) !important;
-  border: none !important;
-  padding: 0 !important;
-  overflow: hidden;
-}
-.leaflet-popup-content { margin: 0 !important; width: auto !important; }
-.leaflet-popup-tip-container { margin-top: -1px; }
-.popup-card { padding: 16px 18px; min-width: 220px; max-width: 280px; }
-.popup-name {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700; font-size: 15px;
-  color: var(--navy); margin-bottom: 4px;
-}
-.popup-addr { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-.popup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
-.popup-tag {
-  font-size: 10px; font-weight: 600;
-  padding: 2px 8px; border-radius: 20px;
-  background: rgba(0,216,181,.12);
-  color: var(--teal);
-  text-transform: uppercase; letter-spacing: .3px;
-}
-.popup-link {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 12px; font-weight: 600;
-  color: var(--orange); text-decoration: none;
-  transition: color .15s;
-}
-.popup-link:hover { color: var(--teal); }
-.popup-dist {
-  float: right;
-  font-size: 11px; font-weight: 700;
-  color: var(--teal);
-  background: rgba(0,193,239,.1);
-  padding: 2px 7px; border-radius: 10px;
-}
+/* FOOTER */
+.site-footer{background:var(--navy);padding:32px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:16px}
+.footer-links a{font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--mint)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.3)}
 
-/* ══════════════════════════════════════════
-   DIRECTORY SECTION
-══════════════════════════════════════════ */
-.directory {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 44px 28px 60px;
-}
-.directory-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-.directory-title {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-  color: var(--navy);
-}
-.directory-subtitle {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 3px;
-}
-.result-count {
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
-}
-.result-count strong { color: var(--navy); }
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(4,69,92,.6);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:18px;padding:32px;max-width:520px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.3);transform:translateY(20px);transition:transform .25s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.modal-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--navy)}
+.modal-close{background:var(--light);border:none;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{background:var(--border)}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.form-label .req{color:var(--orange)}
+.form-input,.form-textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:white;outline:none;transition:border-color .15s}
+.form-input:focus,.form-textarea:focus{border-color:var(--mint)}
+.form-textarea{resize:vertical;min-height:90px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tag-checkboxes{display:flex;flex-wrap:wrap;gap:8px}
+.tag-cb{display:none}
+.tag-cb-label{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;user-select:none}
+.tag-cb:checked+.tag-cb-label{background:var(--mint);border-color:var(--mint);color:var(--navy)}
+.btn-submit-form{width:100%;padding:13px;background:var(--mint);color:var(--navy);font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;border:none;border-radius:10px;cursor:pointer;transition:all .2s;margin-top:8px}
+.btn-submit-form:hover{background:var(--mint-d)}
+.btn-submit-form:disabled{opacity:.6;cursor:not-allowed}
+.form-success{text-align:center;padding:20px}
+.form-success .icon{font-size:48px;margin-bottom:12px}
+.form-success h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--navy);margin-bottom:8px}
+.form-success p{font-size:14px;color:var(--muted)}
 
-/* Filter chips */
-.filter-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 28px;
-}
-.filter-chip {
-  padding: 6px 16px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: white;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all .18s;
-}
-.filter-chip:hover { border-color: var(--mint); color: var(--teal); }
-.filter-chip.active {
-  background: var(--navy);
-  border-color: var(--navy);
-  color: white;
-}
-
-/* Shop grid */
-.shops-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-  gap: 20px;
-}
-.shop-card {
-  background: white;
-  border-radius: 14px;
-  border: 1.5px solid var(--border);
-  overflow: hidden;
-  cursor: pointer;
-  transition: all .22s cubic-bezier(.34,1.3,.64,1);
-  animation: fadeUp .4s both;
-}
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(16px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-.shop-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(4,69,92,.13);
-  border-color: var(--mint);
-}
-.shop-card.highlighted {
-  border-color: var(--orange);
-  box-shadow: 0 0 0 3px rgba(255,118,70,.2);
-}
-.shop-card-accent {
-  height: 5px;
-  background: linear-gradient(90deg, var(--mint), var(--cyan));
-}
-.shop-card-body { padding: 18px 20px; }
-.shop-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-.shop-name {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--navy);
-  line-height: 1.2;
-}
-.shop-dist {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--teal);
-  background: rgba(0,193,239,.1);
-  padding: 3px 9px;
-  border-radius: 12px;
-  white-space: nowrap;
-  margin-left: 8px;
-  flex-shrink: 0;
-}
-.shop-address {
-  font-size: 12.5px;
-  color: var(--muted);
-  margin-bottom: 10px;
-  display: flex; align-items: flex-start; gap: 4px;
-}
-.shop-desc {
-  font-size: 13px;
-  color: #3a5560;
-  line-height: 1.55;
-  margin-bottom: 14px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.shop-tags {
-  display: flex; flex-wrap: wrap; gap: 5px;
-  margin-bottom: 14px;
-}
-.shop-tag {
-  font-size: 10px; font-weight: 600;
-  padding: 3px 9px; border-radius: 20px;
-  background: rgba(0,216,181,.1);
-  color: var(--teal);
-  border: 1px solid rgba(0,216,181,.25);
-  text-transform: uppercase; letter-spacing: .3px;
-}
-.shop-tag.orange {
-  background: rgba(255,118,70,.1);
-  color: var(--orange);
-  border-color: rgba(255,118,70,.25);
-}
-.shop-tag.blue {
-  background: rgba(0,193,239,.1);
-  color: #0086b3;
-  border-color: rgba(0,193,239,.25);
-}
-.shop-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-top: 1px solid var(--border);
-  background: #fafeff;
-}
-.shop-website {
-  font-size: 12px; font-weight: 600;
-  color: var(--orange); text-decoration: none;
-  transition: color .15s;
-  display: flex; align-items: center; gap: 4px;
-}
-.shop-website:hover { color: var(--teal); }
-.btn-show-map {
-  font-size: 12px; font-weight: 600;
-  color: var(--navy); background: none;
-  border: 1.5px solid var(--border);
-  padding: 5px 12px; border-radius: 8px;
-  cursor: pointer; transition: all .18s;
-  display: flex; align-items: center; gap: 4px;
-}
-.btn-show-map:hover {
-  background: var(--mint); color: var(--navy);
-  border-color: var(--mint);
-}
-
-/* Empty state */
-.empty-state {
-  text-align: center; padding: 60px 20px;
-  color: var(--muted);
-}
-.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-.empty-state h3 {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700; font-size: 18px;
-  color: var(--navy); margin-bottom: 6px;
-}
-
-/* ══════════════════════════════════════════
-   INFO BAND
-══════════════════════════════════════════ */
-.info-band {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-l) 100%);
-  padding: 48px 32px;
-  text-align: center;
-}
-.info-band h2 {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700; font-size: 26px;
-  color: white; margin-bottom: 10px;
-}
-.info-band p { color: rgba(255,255,255,.7); font-size: 15px; margin-bottom: 24px; }
-.btn-submit {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--amber); color: var(--navy);
-  font-weight: 700; font-size: 15px;
-  padding: 13px 28px; border-radius: 12px;
-  text-decoration: none; transition: all .2s;
-  box-shadow: 0 4px 16px rgba(255,187,83,.4);
-}
-.btn-submit:hover { background: var(--amber-d); transform: translateY(-2px); }
-
-/* ══════════════════════════════════════════
-   FOOTER
-══════════════════════════════════════════ */
-.site-footer {
-  background: var(--navy);
-  padding: 32px;
-  text-align: center;
-}
-.footer-links {
-  display: flex; justify-content: center;
-  gap: 24px; flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-.footer-links a {
-  font-size: 13px; color: rgba(255,255,255,.55);
-  text-decoration: none; transition: color .15s;
-}
-.footer-links a:hover { color: var(--mint); }
-.footer-copy {
-  font-size: 12px;
-  color: rgba(255,255,255,.3);
-}
-
-/* ══════════════════════════════════════════
-   SUBMIT MODAL
-══════════════════════════════════════════ */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(4,69,92,.6);
-  backdrop-filter: blur(4px);
-  z-index: 2000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; pointer-events: none;
-  transition: opacity .2s;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal {
-  background: white; border-radius: 18px;
-  padding: 32px; max-width: 520px; width: 100%;
-  box-shadow: 0 24px 64px rgba(0,0,0,.3);
-  transform: translateY(20px);
-  transition: transform .25s;
-  max-height: 90vh; overflow-y: auto;
-}
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 24px;
-}
-.modal-title {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700; font-size: 20px; color: var(--navy);
-}
-.modal-close {
-  background: var(--light); border: none;
-  width: 32px; height: 32px; border-radius: 50%;
-  font-size: 16px; cursor: pointer; color: var(--muted);
-  display: flex; align-items: center; justify-content: center;
-  transition: all .15s;
-}
-.modal-close:hover { background: var(--border); }
-.form-group { margin-bottom: 18px; }
-.form-label {
-  display: block; font-size: 13px; font-weight: 600;
-  color: var(--navy); margin-bottom: 6px;
-}
-.form-label .req { color: var(--orange); }
-.form-input, .form-textarea, .form-select {
-  width: 100%; padding: 11px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; color: var(--text);
-  background: white; outline: none;
-  transition: border-color .15s;
-}
-.form-input:focus, .form-textarea:focus { border-color: var(--mint); }
-.form-textarea { resize: vertical; min-height: 90px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.tag-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag-cb { display: none; }
-.tag-cb-label {
-  padding: 5px 14px; border-radius: 20px;
-  border: 1.5px solid var(--border);
-  font-size: 12px; font-weight: 600;
-  color: var(--muted); cursor: pointer;
-  transition: all .15s; user-select: none;
-}
-.tag-cb:checked + .tag-cb-label {
-  background: var(--mint); border-color: var(--mint);
-  color: var(--navy);
-}
-.btn-submit-form {
-  width: 100%; padding: 13px;
-  background: var(--mint); color: var(--navy);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700; font-size: 15px;
-  border: none; border-radius: 10px;
-  cursor: pointer; transition: all .2s;
-  margin-top: 8px;
-}
-.btn-submit-form:hover { background: var(--mint-d); }
-.form-success {
-  text-align: center; padding: 20px;
-}
-.form-success .icon { font-size: 48px; margin-bottom: 12px; }
-.form-success h3 {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700; font-size: 20px;
-  color: var(--navy); margin-bottom: 8px;
-}
-.form-success p { font-size: 14px; color: var(--muted); }
-
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .site-nav { display: none; }
-  .site-nav.open {
-    display: flex; flex-direction: column;
-    position: absolute; top: 62px; left: 0; right: 0;
-    background: var(--amber);
-    padding: 12px; gap: 4px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.15);
-    z-index: 999;
-  }
-  .hamburger { display: flex; }
-  .header-inner { position: relative; }
-  .hero { padding: 32px 20px 44px; }
-  .search-bar { flex-direction: column; }
-  .search-field, .radius-wrap { border-right: none; border-bottom: 1px solid var(--border); width: 100%; }
-  .btn-locate, .btn-search { width: 100%; justify-content: center; }
-  .stats-strip { gap: 24px; padding: 14px 20px; }
-  .form-row { grid-template-columns: 1fr; }
-  .directory { padding: 32px 16px 48px; }
+@media(max-width:768px){
+  .site-nav{display:none}
+  .site-nav.open{display:flex;flex-direction:column;position:absolute;top:62px;left:0;right:0;background:var(--amber);padding:12px;gap:4px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:999}
+  .hamburger{display:flex}
+  .header-inner{position:relative}
+  .hero{padding:32px 20px 44px}
+  .search-bar{flex-direction:column}
+  .search-field,.radius-wrap{border-right:none;border-bottom:1px solid var(--border);width:100%}
+  .btn-locate,.btn-search{width:100%;justify-content:center}
+  .stats-strip{gap:24px;padding:14px 20px}
+  .form-row{grid-template-columns:1fr}
+  .directory{padding:32px 16px 48px}
 }
 </style>
 </head>
 <body>
 
-<!-- ══ HEADER ════════════════════════════════ -->
 <header class="site-header">
   <div class="header-inner">
     <a class="site-logo" href="#">
-      <div class="logo-icon">♻</div>
-      <div class="logo-text">
-        Zero Waste Near Me
-        <span>UK Refill Directory</span>
-      </div>
+      <div class="logo-icon">&#9851;</div>
+      <div class="logo-text">Zero Waste Near Me<span>UK Refill Directory</span></div>
     </a>
     <nav class="site-nav" id="siteNav">
       <a class="nav-link" href="#">Community</a>
       <a class="nav-link" href="#">Locations</a>
       <a class="nav-link" href="#">Shops</a>
       <a class="nav-link" href="#">Blog</a>
-      <a class="nav-link cta" href="#" onclick="openModal(); return false;">+ Add to Map</a>
+      <a class="nav-link cta" href="#" onclick="openModal();return false">+ Add to Map</a>
     </nav>
     <button class="hamburger" id="hamburger" onclick="toggleNav()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -737,18 +200,17 @@ body {
   </div>
 </header>
 
-<!-- ══ HERO / SEARCH ═════════════════════════ -->
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-eyebrow">🇬🇧 UK's Zero Waste Directory</div>
+    <div class="hero-eyebrow">&#127468;&#127463; UK's Zero Waste Directory</div>
     <h1 class="hero-title">Find <em>Zero Waste</em> Shops<br>Near You</h1>
     <p class="hero-sub">Discover refill stores, bulk food shops, and plastic-free retailers in your area.</p>
     <div class="search-bar">
       <div class="search-field">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">&#128269;</span>
         <input class="search-input" type="text" id="searchInput"
-          placeholder="Postcode, town or shop name…"
-          onkeydown="if(event.key==='Enter')doSearch()">
+          placeholder="Postcode, town or shop name&#8230;"
+          onkeydown="if(event.key==='Enter') doSearch()">
       </div>
       <div class="radius-wrap">
         <select class="radius-select" id="radiusSelect">
@@ -758,81 +220,75 @@ body {
           <option value="999">Anywhere in UK</option>
         </select>
       </div>
-      <button class="btn-locate" onclick="locateUser()">📍 Use My Location</button>
-      <button class="btn-search" onclick="doSearch()">Search →</button>
+      <button class="btn-locate" onclick="locateUser()">&#128205; Use My Location</button>
+      <button class="btn-search" onclick="doSearch()">Search &#8594;</button>
     </div>
   </div>
 </section>
 
-<!-- ══ STATS STRIP ═══════════════════════════ -->
 <div class="stats-strip">
-  <div class="stat"><span class="stat-num" id="statTotal">12</span><span class="stat-label">&nbsp;Shops Listed</span></div>
-  <div class="stat"><span class="stat-num">6</span><span class="stat-label">&nbsp;Cities Covered</span></div>
+  <div class="stat"><span class="stat-num" id="statTotal">&#8212;</span><span class="stat-label">&nbsp;Shops Listed</span></div>
+  <div class="stat"><span class="stat-num" id="statCities">&#8212;</span><span class="stat-label">&nbsp;Cities Covered</span></div>
   <div class="stat"><span class="stat-num">100%</span><span class="stat-label">&nbsp;Community Powered</span></div>
   <div class="stat"><span class="stat-num">Free</span><span class="stat-label">&nbsp;Always Free to Use</span></div>
 </div>
 
-<!-- ══ MAP ═══════════════════════════════════ -->
 <section class="map-section">
   <div id="map"></div>
   <div class="map-overlay-badge">
     <div class="map-dot"></div>
-    <span id="mapBadge">12 shops on map</span>
+    <span id="mapBadge">Loading&#8230;</span>
   </div>
 </section>
 
-<!-- ══ DIRECTORY ═════════════════════════════ -->
 <section class="directory" id="directory">
   <div class="directory-header">
     <div>
       <h2 class="directory-title" id="directoryTitle">All Zero Waste Shops</h2>
-      <p class="directory-subtitle" id="directorySubtitle">Showing all UK listings — search or use location for nearby results</p>
+      <p class="directory-subtitle" id="directorySubtitle">Loading shops from the database&#8230;</p>
     </div>
-    <div class="result-count" id="resultCount"><strong>12</strong> shops found</div>
+    <div class="result-count" id="resultCount"></div>
   </div>
-
-  <!-- Tag filters -->
-  <div class="filter-row" id="filterRow">
-    <button class="filter-chip active" onclick="filterByTag('all', this)">All</button>
-    <button class="filter-chip" onclick="filterByTag('food refill', this)">🌾 Food Refill</button>
-    <button class="filter-chip" onclick="filterByTag('household refill', this)">🧴 Household</button>
-    <button class="filter-chip" onclick="filterByTag('beauty', this)">✨ Beauty</button>
-    <button class="filter-chip" onclick="filterByTag('organic', this)">🌿 Organic</button>
-    <button class="filter-chip" onclick="filterByTag('community', this)">🤝 Community</button>
-    <button class="filter-chip" onclick="filterByTag('plastic-free', this)">♻ Plastic-Free</button>
+  <div class="filter-row">
+    <button class="filter-chip active" onclick="filterByTag('all',this)">All</button>
+    <button class="filter-chip" onclick="filterByTag('food refill',this)">&#127807; Food Refill</button>
+    <button class="filter-chip" onclick="filterByTag('household refill',this)">&#129514; Household</button>
+    <button class="filter-chip" onclick="filterByTag('beauty',this)">&#10024; Beauty</button>
+    <button class="filter-chip" onclick="filterByTag('organic',this)">&#127807; Organic</button>
+    <button class="filter-chip" onclick="filterByTag('community',this)">&#129309; Community</button>
+    <button class="filter-chip" onclick="filterByTag('plastic-free',this)">&#9851; Plastic-Free</button>
   </div>
-
-  <div class="shops-grid" id="shopsGrid"></div>
+  <div id="errorBanner" class="error-banner">
+    &#9888;&#65039; <span id="errorMsg"></span>
+  </div>
+  <div class="shops-grid" id="shopsGrid">
+    <div class="loading-state"><div class="spinner"></div><p>Loading shops&#8230;</p></div>
+  </div>
 </section>
 
-<!-- ══ CTA BAND ═══════════════════════════════ -->
 <section class="info-band">
   <h2>Know a zero waste shop we're missing?</h2>
   <p>Help grow the UK's most complete refill directory. Submissions are reviewed within 48 hours.</p>
-  <a href="#" class="btn-submit" onclick="openModal(); return false;">
-    📍 Add a Shop to the Map
-  </a>
+  <a href="#" class="btn-cta" onclick="openModal();return false">&#128205; Add a Shop to the Map</a>
 </section>
 
-<!-- ══ FOOTER ════════════════════════════════ -->
 <footer class="site-footer">
   <div class="footer-links">
     <a href="#">Zero Waste Directory</a>
     <a href="#">Add Your Business</a>
-    <a href="#">Add Local Shops</a>
     <a href="#">Community</a>
     <a href="#">Blog</a>
     <a href="#">Contact Us</a>
   </div>
-  <p class="footer-copy">© 2025 Zero Waste Near Me. All rights reserved.</p>
+  <p class="footer-copy">&#169; 2025 Zero Waste Near Me. All rights reserved.</p>
 </footer>
 
-<!-- ══ SUBMIT MODAL ═══════════════════════════ -->
-<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Add a Shop to the Map</h2>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
     </div>
     <div id="formContent">
       <div class="form-row">
@@ -855,10 +311,10 @@ body {
       </div>
       <div class="form-group">
         <label class="form-label">Description</label>
-        <textarea class="form-textarea" id="f-desc" placeholder="Tell people what this shop sells, its ethos, opening hours…"></textarea>
+        <textarea class="form-textarea" id="f-desc" placeholder="What does this shop sell? Opening hours, ethos..."></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Categories (select all that apply)</label>
+        <label class="form-label">Categories</label>
         <div class="tag-checkboxes">
           <input class="tag-cb" type="checkbox" id="tc1" value="food refill"><label class="tag-cb-label" for="tc1">Food Refill</label>
           <input class="tag-cb" type="checkbox" id="tc2" value="household refill"><label class="tag-cb-label" for="tc2">Household Refill</label>
@@ -867,296 +323,261 @@ body {
           <input class="tag-cb" type="checkbox" id="tc5" value="loose produce"><label class="tag-cb-label" for="tc5">Loose Produce</label>
           <input class="tag-cb" type="checkbox" id="tc6" value="plastic-free"><label class="tag-cb-label" for="tc6">Plastic-Free</label>
           <input class="tag-cb" type="checkbox" id="tc7" value="community"><label class="tag-cb-label" for="tc7">Community</label>
-          <input class="tag-cb" type="checkbox" id="tc8" value="café"><label class="tag-cb-label" for="tc8">Café</label>
+          <input class="tag-cb" type="checkbox" id="tc8" value="cafe"><label class="tag-cb-label" for="tc8">Cafe</label>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Your Email (optional — for submission updates)</label>
+        <label class="form-label">Your Email <span style="color:var(--muted);font-weight:400">(optional)</span></label>
         <input class="form-input" type="email" id="f-email" placeholder="hello@example.com">
       </div>
-      <button class="btn-submit-form" onclick="submitForm()">Submit for Review →</button>
+      <button class="btn-submit-form" id="submitBtn" onclick="submitForm()">Submit for Review &#8594;</button>
     </div>
     <div class="form-success" id="formSuccess" style="display:none">
-      <div class="icon">🌿</div>
+      <div class="icon">&#127807;</div>
       <h3>Thank you!</h3>
-      <p>Your submission has been received and will be reviewed within 48 hours. Once approved it'll appear on the map.</p>
+      <p>Your submission has been received and will be reviewed within 48 hours.</p>
     </div>
   </div>
 </div>
 
 <script>
-/* ══════════════════════════════════
-   SHOP DATA (replace with API calls)
-══════════════════════════════════ */
-const SHOPS = [
-  { id:1,  name:"The Refill Pantry",        address:"14 Brick Lane, London",             postcode:"E1 6RF",   lat:51.5213, lng:-0.0714, website:"therefillpantry.co.uk",       desc:"London's original zero-waste grocery. Bring your own containers for pasta, grains, oils and cleaning products.", tags:["food refill","household refill","loose produce"] },
-  { id:2,  name:"Edinburgh Eco Store",      address:"22 Grassmarket, Edinburgh",          postcode:"EH1 2JU",  lat:55.9477, lng:-3.1921, website:"edinburghecostore.com",         desc:"Scotland's favourite zero-waste shop — over 300 products from locally sourced grains to refillable cosmetics.", tags:["food refill","beauty","loose herbs"] },
-  { id:3,  name:"Manchester Bulk & Brew",   address:"7 Northern Quarter, Manchester",     postcode:"M4 1HB",   lat:53.4843, lng:-2.2326, website:"bulkandbrew.co.uk",             desc:"Organic bulk dry goods, specialty coffee, and a zero-waste café. All cups compostable.", tags:["food refill","café","organic"] },
-  { id:4,  name:"Bristol Zero Waste Hub",   address:"45 Stokes Croft, Bristol",           postcode:"BS1 3QP",  lat:51.4645, lng:-2.5897, website:"bristolzerowaste.org",          desc:"Community-owned refill shop. All profits reinvested into local environmental projects.", tags:["household refill","food refill","community"] },
-  { id:5,  name:"Leeds Naked Pantry",       address:"9 Thornton's Arcade, Leeds",         postcode:"LS1 6HX",  lat:53.7989, lng:-1.5424, website:"nakedpantry.co.uk",             desc:"Beautifully designed zero-waste concept store. Refill everything from tahini to washing-up liquid.", tags:["food refill","household refill","loose spices"] },
-  { id:6,  name:"Brighton Packaging Free",  address:"33 Trafalgar Street, Brighton",      postcode:"BN1 4ED",  lat:50.8281, lng:-0.1403, website:"brightonpackagingfree.com",     desc:"Sea-side zero-waste pioneer. Focus on plastic-free household and beauty products.", tags:["household refill","beauty","plastic-free"] },
-  { id:7,  name:"Cardiff Refill Co.",       address:"17 Morgan Arcade, Cardiff",          postcode:"CF10 1AF", lat:51.4816, lng:-3.1791, website:"cardiffrefill.co.uk",            desc:"Wales' first dedicated refill shop. Over 200 loose products from UK suppliers.", tags:["food refill","household refill"] },
-  { id:8,  name:"Glasgow Green Living",     address:"81 Byres Road, Glasgow",             postcode:"G11 5HW",  lat:55.8717, lng:-4.2970, website:"glasgowgreenliving.co.uk",      desc:"Refill shop and sustainability workshop space. Weekly drop-in sessions on zero waste living.", tags:["food refill","community","organic"] },
-  { id:9,  name:"Oxford Scoop & Weigh",     address:"4 Covered Market, Oxford",           postcode:"OX1 3DU",  lat:51.7520, lng:-1.2578, website:"scoopandweigh.co.uk",           desc:"Nestled in Oxford's historic covered market. Organic pulses, grains and artisan condiments.", tags:["food refill","organic","loose produce"] },
-  { id:10, name:"Nottingham Eco Emporium",  address:"25 Pelham Street, Nottingham",       postcode:"NG1 2EG",  lat:52.9548, lng:-1.1440, website:"ecoemporium.co.uk",             desc:"Three floors of sustainable living. Ground floor fully dedicated to refill stations.", tags:["household refill","food refill","beauty"] },
-  { id:11, name:"Liverpool Refill Bar",     address:"6 Bold Street, Liverpool",           postcode:"L1 4DS",   lat:53.4052, lng:-2.9803, website:"liverpoolrefillbar.com",        desc:"Vibrant refill bar concept with regular pop-up events. Natural cleaning and personal care specialists.", tags:["household refill","beauty","plastic-free"] },
-  { id:12, name:"Newcastle Loose & Local",  address:"Grainger Market, Newcastle",         postcode:"NE1 5QQ",  lat:54.9716, lng:-1.6119, website:"looseandlocal.co.uk",          desc:"Inside the historic Grainger Market. Most loose food products supplied by local producers.", tags:["food refill","community","loose produce"] },
-];
+// ── Supabase config ──────────────────────────────
+const SUPABASE_URL = 'https://xmrqlhkneffuqdibqrjj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_AV8VQGAwXuUT9PjiBYlWkA_f1z_J6RI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── State ────────────────────────────────────────
+let allShops = [], shownShops = [], markers = [], userMarker = null, map;
+let activeFilter = 'all';
 
 const TAG_COLORS = {
-  "food refill": "", "household refill": "orange",
-  "beauty": "blue", "organic": "", "loose produce": "",
-  "loose herbs": "", "loose spices": "", "plastic-free": "blue",
-  "community": "orange", "café": "blue", "organic": "", "local produce": ""
+  'household refill':'orange','community':'orange',
+  'beauty':'blue','plastic-free':'blue','cafe':'blue'
 };
 
-/* ══════════════════════════════════
-   MAP
-══════════════════════════════════ */
-let map, markers = [], activeFilter = 'all', userMarker = null;
-
-const pinSVG = color => `<svg viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg" width="28" height="36">
-  <path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.3 21.7 0 14 0z" fill="${color}"/>
-  <circle cx="14" cy="14" r="6" fill="white"/>
-</svg>`;
-
-const makeIcon = (color='#00d8b5') => L.divIcon({
-  className:'', iconSize:[28,36], iconAnchor:[14,36], popupAnchor:[0,-38],
-  html: pinSVG(color)
-});
-
-const userIcon = L.divIcon({
-  className:'', iconSize:[20,20], iconAnchor:[10,10],
-  html:`<div style="width:20px;height:20px;background:#ff7646;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>`
-});
-
+// ── Map ──────────────────────────────────────────
 function initMap() {
-  map = L.map('map', { zoomControl: true }).setView([54.0, -2.5], 6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-    maxZoom: 19
+  map = L.map('map').setView([54.0,-2.5],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19
   }).addTo(map);
-  plotShops(SHOPS);
 }
 
+const pinIcon = () => L.divIcon({
+  className:'',iconSize:[28,36],iconAnchor:[14,36],popupAnchor:[0,-38],
+  html:'<svg viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg" width="28" height="36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.3 21.7 0 14 0z" fill="#00d8b5"/><circle cx="14" cy="14" r="6" fill="white"/></svg>'
+});
+
+const youIcon = L.divIcon({
+  className:'',iconSize:[20,20],iconAnchor:[10,10],
+  html:'<div style="width:20px;height:20px;background:#ff7646;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>'
+});
+
 function plotShops(shops) {
-  markers.forEach(m => m.remove());
+  markers.forEach(m => m.marker.remove());
   markers = [];
   shops.forEach(s => {
-    const m = L.marker([s.lat, s.lng], { icon: makeIcon() }).addTo(map);
-    m.bindPopup(buildPopup(s), { maxWidth: 300 });
-    m.on('click', () => highlightCard(s.id));
-    markers.push(m);
+    if (!s.latitude||!s.longitude) return;
+    const m = L.marker([s.latitude,s.longitude],{icon:pinIcon()}).addTo(map);
+    m.bindPopup(buildPopup(s),{maxWidth:300});
+    m.on('click',() => highlightCard(s.id));
+    markers.push({marker:m,shopId:s.id});
   });
   document.getElementById('mapBadge').textContent = shops.length + ' shops on map';
 }
 
 function buildPopup(s) {
-  const tagsHtml = s.tags.map(t => `<span class="popup-tag">${t}</span>`).join('');
-  const distHtml = s.distMi ? `<span class="popup-dist">${s.distMi} mi</span>` : '';
-  const link = s.website
-    ? `<a class="popup-link" href="https://${s.website}" target="_blank">🌐 Visit website</a>`
-    : '';
-  return `<div class="popup-card">
-    <div class="popup-name">${s.name} ${distHtml}</div>
-    <div class="popup-addr">📍 ${s.address}, ${s.postcode}</div>
-    <div class="popup-tags">${tagsHtml}</div>
-    ${link}
-  </div>`;
+  const tags = (s.tags||[]).map(t=>'<span class="popup-tag">'+t+'</span>').join('');
+  const dist = s.distMi ? '<span class="popup-dist">'+s.distMi+' mi</span>' : '';
+  const link = s.website ? '<a class="popup-link" href="'+s.website+'" target="_blank" rel="noopener">Visit website</a>' : '';
+  return '<div class="popup-card"><div class="popup-name">'+s.name+' '+dist+'</div>'
+       + '<div class="popup-addr">'+( s.address||'' )+(s.postcode?', '+s.postcode:'')+'</div>'
+       + '<div class="popup-tags">'+tags+'</div>'+link+'</div>';
 }
 
-/* ══════════════════════════════════
-   RENDER CARDS
-══════════════════════════════════ */
-function renderCards(shops) {
-  const grid = document.getElementById('shopsGrid');
-  document.getElementById('resultCount').innerHTML = `<strong>${shops.length}</strong> shop${shops.length !== 1 ? 's' : ''} found`;
-  document.getElementById('statTotal').textContent = shops.length;
+// ── Load from Supabase ───────────────────────────
+async function loadShops() {
+  try {
+    const { data, error } = await sb.from('shops').select('*').eq('status','active').order('name');
+    if (error) throw error;
+    allShops = data || [];
+    shownShops = [...allShops];
+    const cities = new Set(allShops.map(s=>(s.postcode||'').split(' ')[0]).filter(Boolean));
+    document.getElementById('statTotal').textContent = allShops.length;
+    document.getElementById('statCities').textContent = cities.size;
+    document.getElementById('directorySubtitle').textContent = 'Showing all '+allShops.length+' UK listings';
+    renderCards(shownShops);
+    plotShops(shownShops);
+    hideError();
+  } catch(err) {
+    showError('Could not load shops: '+err.message);
+    document.getElementById('shopsGrid').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><h3>Database Error</h3><p>'+err.message+'</p></div>';
+  }
+}
 
-  if (shops.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-      <div class="icon">🌿</div>
-      <h3>No shops found</h3>
-      <p>Try a different search term, expand your radius, or <a href="#" onclick="openModal();return false" style="color:var(--orange)">add one to the map</a>.</p>
-    </div>`;
+// ── Render cards ─────────────────────────────────
+function renderCards(shops) {
+  document.getElementById('resultCount').innerHTML = '<strong>'+shops.length+'</strong> shop'+(shops.length!==1?'s':'')+' found';
+  if (!shops.length) {
+    document.getElementById('shopsGrid').innerHTML = '<div class="empty-state"><div class="icon">&#127807;</div><h3>No shops found</h3><p>Try a different search or <a href="#" onclick="openModal();return false" style="color:var(--orange)">add one to the map</a>.</p></div>';
     return;
   }
-
-  grid.innerHTML = shops.map((s, i) => {
-    const tagsHtml = s.tags.map(t =>
-      `<span class="shop-tag ${TAG_COLORS[t]||''}">${t}</span>`
-    ).join('');
-    const distHtml = s.distMi ? `<span class="shop-dist">${s.distMi} mi</span>` : '';
+  document.getElementById('shopsGrid').innerHTML = shops.map((s,i) => {
+    const tags = (s.tags||[]).map(t=>'<span class="shop-tag '+(TAG_COLORS[t]||'')+'">'+t+'</span>').join('');
+    const dist = s.distMi ? '<span class="shop-dist">'+s.distMi+' mi</span>' : '';
     const link = s.website
-      ? `<a class="shop-website" href="https://${s.website}" target="_blank" onclick="event.stopPropagation()">🌐 ${s.website}</a>`
-      : `<span></span>`;
-    return `
-    <div class="shop-card" id="card-${s.id}" onclick="flyTo(${s.lat},${s.lng},${s.id})"
-         style="animation-delay:${i * 0.04}s">
-      <div class="shop-card-accent"></div>
-      <div class="shop-card-body">
-        <div class="shop-card-top">
-          <div class="shop-name">${s.name}</div>
-          ${distHtml}
-        </div>
-        <div class="shop-address">📍 ${s.address}, ${s.postcode}</div>
-        <div class="shop-desc">${s.desc}</div>
-        <div class="shop-tags">${tagsHtml}</div>
-      </div>
-      <div class="shop-card-footer">
-        ${link}
-        <button class="btn-show-map" onclick="event.stopPropagation();flyTo(${s.lat},${s.lng},${s.id})">🗺 Show on map</button>
-      </div>
-    </div>`;
+      ? '<a class="shop-website" href="'+s.website+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#127760; '+s.website.replace(/^https?:\/\//,'')+'</a>'
+      : '<span></span>';
+    return '<div class="shop-card" id="card-'+s.id+'" onclick="flyTo('+s.latitude+','+s.longitude+','+s.id+')" style="animation-delay:'+Math.min(i,12)*0.04+'s">'
+      + '<div class="shop-card-accent"></div>'
+      + '<div class="shop-card-body">'
+      + '<div class="shop-card-top"><div class="shop-name">'+s.name+'</div>'+dist+'</div>'
+      + '<div class="shop-address">&#128205; '+(s.address||'')+(s.postcode?', '+s.postcode:'')+'</div>'
+      + '<div class="shop-desc">'+(s.description||'')+'</div>'
+      + '<div class="shop-tags">'+tags+'</div>'
+      + '</div>'
+      + '<div class="shop-card-footer">'+link
+      + '<button class="btn-show-map" onclick="event.stopPropagation();flyTo('+s.latitude+','+s.longitude+','+s.id+')">&#128506; Show on map</button>'
+      + '</div></div>';
   }).join('');
 }
 
-function flyTo(lat, lng, id) {
-  map.flyTo([lat, lng], 15, { duration: 1.0 });
-  document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+function flyTo(lat,lng,id) {
+  if (!lat||!lng) return;
+  map.flyTo([lat,lng],15,{duration:1.0});
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   highlightCard(id);
-  // Open popup
-  const i = currentShops.findIndex(s => s.id === id);
-  if (i >= 0 && markers[i]) markers[i].openPopup();
+  const e = markers.find(m=>m.shopId===id);
+  if (e) e.marker.openPopup();
 }
 
 function highlightCard(id) {
-  document.querySelectorAll('.shop-card').forEach(c => c.classList.remove('highlighted'));
-  const el = document.getElementById('card-' + id);
-  if (el) { el.classList.add('highlighted'); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  document.querySelectorAll('.shop-card').forEach(c=>c.classList.remove('highlighted'));
+  const el = document.getElementById('card-'+id);
+  if (el) { el.classList.add('highlighted'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 }
 
-/* ══════════════════════════════════
-   SEARCH & FILTER
-══════════════════════════════════ */
-let currentShops = [...SHOPS];
-
-function doSearch() {
+// ── Search ───────────────────────────────────────
+async function doSearch() {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   if (!q) {
-    applyFilter(SHOPS);
+    shownShops = [...allShops];
     document.getElementById('directoryTitle').textContent = 'All Zero Waste Shops';
-    document.getElementById('directorySubtitle').textContent = 'Showing all UK listings';
-    return;
+    document.getElementById('directorySubtitle').textContent = 'Showing all '+allShops.length+' UK listings';
+    applyTagFilter(shownShops); return;
   }
-  const results = SHOPS.filter(s =>
-    s.name.toLowerCase().includes(q) ||
-    s.address.toLowerCase().includes(q) ||
-    s.postcode.toLowerCase().replace(' ','').includes(q.replace(' ','')) ||
-    s.tags.some(t => t.includes(q))
+  // Text match
+  let results = allShops.filter(s =>
+    (s.name||'').toLowerCase().includes(q) ||
+    (s.address||'').toLowerCase().includes(q) ||
+    (s.postcode||'').toLowerCase().replace(' ','').includes(q.replace(' ','')) ||
+    (s.tags||[]).some(t=>t.includes(q))
   );
-  document.getElementById('directoryTitle').textContent = `Results for "${document.getElementById('searchInput').value}"`;
-  document.getElementById('directorySubtitle').textContent = `${results.length} matching shop${results.length!==1?'s':''}`;
-  applyFilter(results);
-  document.getElementById('directory').scrollIntoView({ behavior:'smooth' });
+  // If looks like postcode and no text results, geocode it
+  if (!results.length && /^[a-z]{1,2}\d/i.test(q)) {
+    await searchByPostcode(q); return;
+  }
+  shownShops = results;
+  document.getElementById('directoryTitle').textContent = 'Results for "'+document.getElementById('searchInput').value+'"';
+  document.getElementById('directorySubtitle').textContent = results.length+' matching shop'+(results.length!==1?'s':'');
+  applyTagFilter(shownShops);
+  document.getElementById('directory').scrollIntoView({behavior:'smooth'});
 }
 
-function filterByTag(tag, btn) {
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+async function searchByPostcode(pc) {
+  try {
+    const r = await fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(pc));
+    const j = await r.json();
+    if (j.status===200&&j.result) filterByDistance(j.result.latitude,j.result.longitude);
+    else showError('Postcode not found. Please try again.');
+  } catch { showError('Could not geocode postcode.'); }
+}
+
+function filterByDistance(lat,lng) {
+  const max = parseFloat(document.getElementById('radiusSelect').value);
+  const nearby = allShops
+    .map(s=>({...s,distMi:haversine(lat,lng,s.latitude,s.longitude)}))
+    .filter(s=>s.distMi<=max).sort((a,b)=>a.distMi-b.distMi);
+  shownShops = nearby;
+  document.getElementById('directoryTitle').textContent = 'Shops Near You';
+  document.getElementById('directorySubtitle').textContent = 'Within '+max+' miles · '+nearby.length+' shop'+(nearby.length!==1?'s':'')+' found';
+  applyTagFilter(shownShops);
+  if (nearby.length) {
+    const b = L.latLngBounds(nearby.filter(s=>s.latitude).map(s=>[s.latitude,s.longitude]));
+    map.fitBounds(b,{padding:[40,40]});
+  }
+  document.getElementById('directory').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Tag filter ───────────────────────────────────
+function filterByTag(tag,btn) {
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   activeFilter = tag;
-  const base = currentShops.length ? currentShops : SHOPS;
-  const filtered = tag === 'all' ? base : base.filter(s => s.tags.includes(tag));
-  renderCards(filtered);
-  plotShops(filtered);
+  applyTagFilter(shownShops);
+}
+function applyTagFilter(shops) {
+  const f = activeFilter==='all' ? shops : shops.filter(s=>(s.tags||[]).includes(activeFilter));
+  renderCards(f); plotShops(f);
 }
 
-function applyFilter(shops) {
-  currentShops = shops;
-  const tag = activeFilter;
-  const filtered = tag === 'all' ? shops : shops.filter(s => s.tags.includes(tag));
-  renderCards(filtered);
-  plotShops(filtered);
-  if (filtered.length > 0) {
-    const bounds = L.latLngBounds(filtered.map(s => [s.lat, s.lng]));
-    map.fitBounds(bounds, { padding: [40, 40] });
-  }
-}
-
-/* ══════════════════════════════════
-   GEOLOCATION
-══════════════════════════════════ */
+// ── Geolocation ──────────────────────────────────
 function locateUser() {
-  if (!navigator.geolocation) { alert('Geolocation not supported in your browser.'); return; }
-  const btn = document.querySelector('.btn-locate');
-  btn.textContent = '⏳ Locating…';
-  navigator.geolocation.getCurrentPosition(pos => {
-    btn.textContent = '📍 Use My Location';
-    const { latitude: lat, longitude: lng } = pos.coords;
+  if (!navigator.geolocation){alert('Geolocation not supported.');return;}
+  const btn=document.querySelector('.btn-locate');
+  btn.textContent='&#9203; Locating…';btn.disabled=true;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    btn.textContent='&#128205; Use My Location';btn.disabled=false;
+    const {latitude:lat,longitude:lng}=pos.coords;
     if (userMarker) userMarker.remove();
-    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map)
-      .bindPopup('<b>You are here</b>').openPopup();
-
-    const maxMi = parseFloat(document.getElementById('radiusSelect').value);
-    const nearby = SHOPS.map(s => ({
-      ...s,
-      distMi: haversine(lat, lng, s.lat, s.lng)
-    })).filter(s => s.distMi <= maxMi)
-       .sort((a, b) => a.distMi - b.distMi);
-
-    document.getElementById('directoryTitle').textContent = 'Shops Near You';
-    document.getElementById('directorySubtitle').textContent =
-      `Within ${maxMi} miles of your location`;
-    applyFilter(nearby);
-    map.setView([lat, lng], 11);
-    document.getElementById('directory').scrollIntoView({ behavior:'smooth' });
-  }, () => {
-    btn.textContent = '📍 Use My Location';
-    alert('Unable to get your location. Please try searching by postcode.');
-  });
+    userMarker=L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>You are here</b>').openPopup();
+    filterByDistance(lat,lng);
+    map.setView([lat,lng],11);
+  },()=>{btn.textContent='&#128205; Use My Location';btn.disabled=false;alert('Could not get location. Try searching by postcode.');});
 }
 
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 3958.8; // miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 +
-    Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2)**2;
-  return Math.round(2 * R * Math.asin(Math.sqrt(a)) * 10) / 10;
+function haversine(lat1,lon1,lat2,lon2){
+  if(!lat1||!lon1||!lat2||!lon2)return 9999;
+  const R=3958.8,dL=(lat2-lat1)*Math.PI/180,dO=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dO/2)**2;
+  return Math.round(2*R*Math.asin(Math.sqrt(a))*10)/10;
 }
 
-/* ══════════════════════════════════
-   MODAL
-══════════════════════════════════ */
-function openModal() {
-  document.getElementById('modalOverlay').classList.add('open');
-  document.getElementById('formContent').style.display = 'block';
-  document.getElementById('formSuccess').style.display = 'none';
-  document.body.style.overflow = 'hidden';
-}
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-function handleOverlayClick(e) {
-  if (e.target === e.currentTarget) closeModal();
-}
-function submitForm() {
-  const name = document.getElementById('f-name').value.trim();
-  const postcode = document.getElementById('f-postcode').value.trim();
-  if (!name || !postcode) {
-    alert('Please fill in at least the shop name and postcode.');
-    return;
+// ── Modal / Submit ───────────────────────────────
+function openModal(){document.getElementById('modalOverlay').classList.add('open');document.getElementById('formContent').style.display='block';document.getElementById('formSuccess').style.display='none';document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+
+async function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const postcode=document.getElementById('f-postcode').value.trim();
+  if(!name||!postcode){alert('Please fill in shop name and postcode.');return;}
+  const tags=[...document.querySelectorAll('.tag-cb:checked')].map(c=>c.value);
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.textContent='Submitting…';
+  try{
+    const {error}=await sb.from('pending_submissions').insert({
+      name,postcode,
+      address:document.getElementById('f-address').value.trim()||null,
+      website:document.getElementById('f-website').value.trim()||null,
+      description:document.getElementById('f-desc').value.trim()||null,
+      tags:tags.length?tags:null,
+      submitter_email:document.getElementById('f-email').value.trim()||null
+    });
+    if(error)throw error;
+    document.getElementById('formContent').style.display='none';
+    document.getElementById('formSuccess').style.display='block';
+  }catch(err){
+    alert('Submission failed: '+err.message);
+    btn.disabled=false;btn.textContent='Submit for Review →';
   }
-  // In production: POST to /api/shops/submit
-  document.getElementById('formContent').style.display = 'none';
-  document.getElementById('formSuccess').style.display = 'block';
 }
 
-/* ══════════════════════════════════
-   NAV HAMBURGER
-══════════════════════════════════ */
-function toggleNav() {
-  document.getElementById('siteNav').classList.toggle('open');
-}
+// ── Helpers ──────────────────────────────────────
+function showError(msg){const el=document.getElementById('errorBanner');document.getElementById('errorMsg').textContent=msg;el.classList.add('show');}
+function hideError(){document.getElementById('errorBanner').classList.remove('show');}
+function toggleNav(){document.getElementById('siteNav').classList.toggle('open');}
 
-/* ══════════════════════════════════
-   INIT
-══════════════════════════════════ */
-window.addEventListener('DOMContentLoaded', () => {
-  initMap();
-  renderCards(SHOPS);
-});
+window.addEventListener('DOMContentLoaded',()=>{initMap();loadShops();});
 </script>
 </body>
 </html>

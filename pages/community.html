@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Initiatives — Zero Waste Near Me</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --amber:#ffbb53;--amber-d:#f0a830;--mint:#00d8b5;--mint-d:#00b89a;
+  --cyan:#00c1ef;--orange:#ff7646;--navy:#04455c;--navy-l:#0a5a78;
+  --teal:#1d93a3;--text:#1c2f38;--muted:#6b8c99;--border:#e0eff3;--light:#f4fbfa;
+  --reuse:#7c3aed;--paint:#dc2626;--tool:#d97706;--repair:#059669;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
+
+/* ── SHARED HEADER ── */
+.site-header{background:var(--amber);position:sticky;top:0;z-index:1000;box-shadow:0 2px 16px rgba(4,69,92,.18)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;max-width:1400px;margin:0 auto}
+.site-logo{display:flex;align-items:center;text-decoration:none}
+.logo-wordmark{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--navy);display:flex;align-items:center}
+.logo-pin{display:inline-flex;align-items:center;justify-content:center;position:relative;top:-1px}
+.logo-sub{display:block;font-family:'Quicksand',sans-serif;font-size:9.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--navy);opacity:.6;margin-top:2px}
+.site-nav{display:flex;align-items:center;gap:4px}
+.nav-link{font-size:13.5px;font-weight:500;color:var(--navy);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all .18s;opacity:.85}
+.nav-link:hover{background:rgba(4,69,92,.1);opacity:1}
+.nav-link.active{opacity:1;font-weight:600}
+.nav-link.cta{background:var(--navy);color:var(--amber);margin-left:8px;opacity:1;font-weight:600;padding:8px 18px}
+.nav-link.cta:hover{background:var(--navy-l)}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px}
+
+/* ── PAGE HERO ── */
+.page-hero{background:var(--navy);padding:52px 32px;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 100% 50%,rgba(0,216,181,.1) 0%,transparent 65%),radial-gradient(ellipse 40% 60% at 0% 100%,rgba(255,187,83,.07) 0%,transparent 60%);pointer-events:none}
+.page-hero-inner{max-width:780px;margin:0 auto;position:relative}
+.breadcrumb{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.breadcrumb a{color:rgba(255,255,255,.45);text-decoration:none;transition:color .15s}
+.breadcrumb a:hover{color:var(--mint)}
+.breadcrumb span{color:rgba(255,255,255,.25)}
+.page-hero h1{font-family:'Quicksand',sans-serif;font-weight:700;font-size:clamp(28px,5vw,46px);color:white;margin-bottom:12px;line-height:1.1}
+.page-hero h1 em{font-style:normal;color:var(--mint)}
+.page-hero p{font-size:15px;color:rgba(255,255,255,.65);max-width:580px;line-height:1.65}
+
+/* ── INITIATIVE TYPE CARDS ── */
+.type-strip{background:white;border-bottom:1.5px solid var(--border);padding:0 32px}
+.type-strip-inner{max-width:1300px;margin:0 auto;display:flex;gap:0;overflow-x:auto}
+.type-tab{display:flex;align-items:center;gap:8px;padding:18px 22px;font-size:13.5px;font-weight:600;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;transition:all .18s;white-space:nowrap;text-decoration:none}
+.type-tab:hover{color:var(--navy)}
+.type-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.type-tab .type-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-all{background:var(--mint)}
+.dot-reuse{background:var(--reuse)}
+.dot-paint{background:var(--paint)}
+.dot-tool{background:var(--tool)}
+.dot-repair{background:var(--repair)}
+
+/* ── MAIN LAYOUT ── */
+.main-wrap{max-width:1300px;margin:0 auto;padding:40px 28px 60px;display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start}
+
+/* ── SEARCH BAR ── */
+.search-row{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.search-field-sm{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:white;border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;transition:border-color .15s}
+.search-field-sm:focus-within{border-color:var(--mint)}
+.search-field-sm input{border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:transparent;width:100%}
+.btn-locate-sm{display:flex;align-items:center;gap:6px;background:var(--navy);color:white;border:none;padding:10px 16px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .18s}
+.btn-locate-sm:hover{background:var(--navy-l)}
+
+/* ── INITIATIVE CARDS ── */
+.initiatives-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.init-card{background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all .22s cubic-bezier(.34,1.3,.64,1);animation:fadeUp .4s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.init-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(4,69,92,.11);border-color:var(--mint)}
+.init-card-top{height:6px}
+.init-card-top.reuse_hub{background:var(--reuse)}
+.init-card-top.paint_recycling{background:var(--paint)}
+.init-card-top.tool_library{background:var(--tool)}
+.init-card-top.repair_cafe{background:var(--repair)}
+.init-card-top.other{background:var(--mint)}
+.init-card-body{padding:18px 20px}
+.init-type-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.badge-reuse_hub{background:rgba(124,58,237,.1);color:var(--reuse)}
+.badge-paint_recycling{background:rgba(220,38,38,.1);color:var(--paint)}
+.badge-tool_library{background:rgba(217,119,6,.1);color:var(--tool)}
+.badge-repair_cafe{background:rgba(5,150,105,.1);color:var(--repair)}
+.badge-other{background:rgba(0,216,181,.1);color:var(--mint-d)}
+.init-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:var(--navy);margin-bottom:5px}
+.init-addr{font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;align-items:flex-start;gap:4px}
+.init-desc{font-size:13px;color:#3a5560;line-height:1.55;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.init-dist{display:inline-block;font-size:11px;font-weight:700;color:var(--teal);background:rgba(0,193,239,.1);padding:3px 9px;border-radius:12px;margin-bottom:8px}
+.init-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-top:1px solid var(--border);background:#fafeff}
+.init-link{font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
+.init-link:hover{color:var(--teal)}
+.btn-map-sm{font-size:12px;font-weight:600;color:var(--navy);background:none;border:1.5px solid var(--border);padding:5px 11px;border-radius:7px;cursor:pointer;transition:all .18s}
+.btn-map-sm:hover{background:var(--mint);border-color:var(--mint)}
+
+/* ── SIDEBAR ── */
+.sidebar{}
+.sidebar-card{background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:20px}
+.sidebar-card-head{padding:20px 20px 0}
+.sidebar-card-head h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:var(--navy);margin-bottom:4px}
+.sidebar-card-head p{font-size:12px;color:var(--muted);margin-bottom:18px}
+#mini-map{height:220px;width:100%}
+.stat-pills{display:flex;flex-wrap:wrap;gap:8px;padding:16px 20px;border-top:1px solid var(--border)}
+.stat-pill{flex:1;min-width:80px;text-align:center;background:var(--light);border-radius:10px;padding:12px 8px}
+.stat-pill-num{font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--navy);display:block}
+.stat-pill-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── SUBMIT FORM ── */
+.submit-card{background:linear-gradient(135deg,var(--navy),var(--navy-l));border-radius:14px;padding:24px;color:white;margin-bottom:20px}
+.submit-card h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;margin-bottom:6px}
+.submit-card p{font-size:13px;opacity:.7;margin-bottom:16px;line-height:1.5}
+.btn-open-submit{width:100%;padding:11px;background:var(--amber);color:var(--navy);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s}
+.btn-open-submit:hover{background:var(--amber-d)}
+
+/* ── LEGEND ── */
+.legend-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:18px 20px}
+.legend-card h4{font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px;color:var(--navy);margin-bottom:12px}
+.legend-item{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
+.legend-item:last-child{border-bottom:none}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+/* ── LOADING / EMPTY ── */
+.loading-state,.empty-state{text-align:center;padding:48px 20px;color:var(--muted);grid-column:1/-1}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state .icon{font-size:44px;margin-bottom:10px}
+.empty-state h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px;color:var(--navy);margin-bottom:5px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(4,69,92,.55);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:18px;padding:32px;max-width:500px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.28);transform:translateY(18px);transition:transform .25s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:var(--navy)}
+.modal-close{background:var(--light);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:5px}
+.form-label .req{color:var(--orange)}
+.form-input,.form-textarea,.form-select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:white;outline:none;transition:border-color .15s}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--mint)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-form-submit{width:100%;padding:12px;background:var(--mint);color:var(--navy);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;margin-top:6px}
+.btn-form-submit:hover{background:var(--mint-d)}
+.btn-form-submit:disabled{opacity:.6;cursor:not-allowed}
+.form-success{text-align:center;padding:24px}
+.form-success .s-icon{font-size:44px;margin-bottom:10px}
+.form-success h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin-bottom:6px}
+.form-success p{font-size:13px;color:var(--muted)}
+
+/* ── FOOTER ── */
+.site-footer{background:var(--navy);padding:32px;text-align:center;margin-top:0}
+.footer-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:14px}
+.footer-links a{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--mint)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.28)}
+
+/* Leaflet popup */
+.leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:0 4px 20px rgba(0,0,0,.15)!important;border:none!important;padding:0!important;overflow:hidden}
+.leaflet-popup-content{margin:0!important}
+.mpopup{padding:14px 16px;min-width:180px}
+.mpopup-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px;color:var(--navy);margin-bottom:3px}
+.mpopup-addr{font-size:11px;color:var(--muted)}
+
+@media(max-width:900px){
+  .main-wrap{grid-template-columns:1fr}
+  .sidebar{order:-1}
+  #mini-map{height:180px}
+}
+@media(max-width:640px){
+  .site-nav{display:none}
+  .site-nav.open{display:flex;flex-direction:column;position:absolute;top:62px;left:0;right:0;background:var(--amber);padding:12px;gap:4px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:999}
+  .hamburger{display:flex}
+  .header-inner{position:relative}
+  .page-hero{padding:36px 20px}
+  .main-wrap{padding:24px 16px 40px}
+  .form-row-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a class="site-logo" href="/">
+      <div>
+        <div class="logo-wordmark">Z<span>e</span>r<span class="logo-pin"><svg width="18" height="22" viewBox="0 0 18 22" xmlns="http://www.w3.org/2000/svg"><path d="M9 0C4.03 0 0 4.03 0 9c0 6.75 9 13 9 13s9-6.25 9-13c0-4.97-4.03-9-9-9z" fill="#04455c"/><circle cx="9" cy="9" r="3.5" fill="#ffbb53"/></svg></span>&nbsp;Waste Near Me</div>
+        <span class="logo-sub">UK Refill Directory</span>
+      </div>
+    </a>
+    <nav class="site-nav" id="siteNav">
+      <a class="nav-link active" href="/pages/community">Community</a>
+      <a class="nav-link" href="/pages/locations">Locations</a>
+      <a class="nav-link" href="/pages/shops">Shops</a>
+      <a class="nav-link" href="/pages/blog">Blog</a>
+      <a class="nav-link cta" href="/" onclick="">+ Add to Map</a>
+    </nav>
+    <button class="hamburger" onclick="document.getElementById('siteNav').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Community</div>
+    <h1>Community <em>Initiatives</em></h1>
+    <p>Beyond shops — discover reuse hubs, paint recycling points, tool libraries, and repair cafes near you. These community-led spaces are at the heart of the circular economy.</p>
+  </div>
+</section>
+
+<!-- TYPE TABS -->
+<div class="type-strip">
+  <div class="type-strip-inner">
+    <button class="type-tab active" onclick="filterType('all',this)"><span class="type-dot dot-all"></span>All</button>
+    <button class="type-tab" onclick="filterType('reuse_hub',this)"><span class="type-dot dot-reuse"></span>Reuse Hubs</button>
+    <button class="type-tab" onclick="filterType('paint_recycling',this)"><span class="type-dot dot-paint"></span>Paint Recycling</button>
+    <button class="type-tab" onclick="filterType('tool_library',this)"><span class="type-dot dot-tool"></span>Tool Libraries</button>
+    <button class="type-tab" onclick="filterType('repair_cafe',this)"><span class="type-dot dot-repair"></span>Repair Cafes</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <!-- LEFT: grid -->
+  <div>
+    <div class="search-row">
+      <div class="search-field-sm">
+        <span>🔍</span>
+        <input type="text" id="initSearch" placeholder="Search by name or postcode…" oninput="filterSearch()">
+      </div>
+      <button class="btn-locate-sm" onclick="locateUser()">📍 Near Me</button>
+    </div>
+    <div class="initiatives-grid" id="initGrid">
+      <div class="loading-state"><div class="spinner"></div><p>Loading initiatives…</p></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-card-head">
+        <h3>Initiatives near you</h3>
+        <p>Zoom in or search to explore</p>
+      </div>
+      <div id="mini-map"></div>
+      <div class="stat-pills" id="statPills">
+        <div class="stat-pill"><span class="stat-pill-num" id="sCnt">—</span><span class="stat-pill-label">Total</span></div>
+        <div class="stat-pill"><span class="stat-pill-num" id="sReuse">—</span><span class="stat-pill-label">Reuse</span></div>
+        <div class="stat-pill"><span class="stat-pill-num" id="sRepair">—</span><span class="stat-pill-label">Repair</span></div>
+        <div class="stat-pill"><span class="stat-pill-num" id="sTool">—</span><span class="stat-pill-label">Tool Lib</span></div>
+      </div>
+    </div>
+
+    <div class="submit-card">
+      <h3>Know an initiative?</h3>
+      <p>Help us grow the directory — submit a reuse hub, tool library or repair cafe near you.</p>
+      <button class="btn-open-submit" onclick="openModal()">+ Submit an Initiative</button>
+    </div>
+
+    <div class="legend-card">
+      <h4>Map Legend</h4>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--reuse)"></span>Reuse Hub</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--paint)"></span>Paint Recycling</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--tool)"></span>Tool Library</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--repair)"></span>Repair Cafe</div>
+    </div>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/">Home</a><a href="/pages/community">Community</a>
+    <a href="/pages/shops">Shops</a><a href="/pages/blog">Blog</a><a href="/">Contact</a>
+  </div>
+  <p class="footer-copy">© 2025 Zero Waste Near Me. All rights reserved.</p>
+</footer>
+
+<!-- SUBMIT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Submit an Initiative</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="formBody">
+      <div class="form-group">
+        <label class="form-label">Type <span class="req">*</span></label>
+        <select class="form-select" id="f-type">
+          <option value="reuse_hub">Reuse Hub</option>
+          <option value="paint_recycling">Paint Recycling</option>
+          <option value="tool_library">Tool Library</option>
+          <option value="repair_cafe">Repair Cafe</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Name <span class="req">*</span></label>
+          <input class="form-input" id="f-name" placeholder="Initiative name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Postcode <span class="req">*</span></label>
+          <input class="form-input" id="f-postcode" placeholder="SW1A 1AA">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input class="form-input" id="f-address" placeholder="Street address">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Website</label>
+        <input class="form-input" id="f-website" placeholder="https://…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="f-desc" placeholder="What does this initiative do? Opening hours, who runs it…"></textarea>
+      </div>
+      <button class="btn-form-submit" id="submitBtn" onclick="submitInit()">Submit for Review →</button>
+    </div>
+    <div class="form-success" id="formSuccess" style="display:none">
+      <div class="s-icon">🌿</div>
+      <h3>Thank you!</h3>
+      <p>Your submission will be reviewed within 48 hours and added to the map once approved.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://xmrqlhkneffuqdibqrjj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_AV8VQGAwXuUT9PjiBYlWkA_f1z_J6RI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const TYPE_COLORS = {reuse_hub:'#7c3aed',paint_recycling:'#dc2626',tool_library:'#d97706',repair_cafe:'#059669',other:'#00d8b5'};
+const TYPE_LABELS = {reuse_hub:'Reuse Hub',paint_recycling:'Paint Recycling',tool_library:'Tool Library',repair_cafe:'Repair Cafe',other:'Other'};
+const TYPE_ICONS  = {reuse_hub:'♻️',paint_recycling:'🎨',tool_library:'🔧',repair_cafe:'🪛',other:'🌿'};
+
+let allInits = [], shownInits = [], markers = [], miniMap, activeType = 'all';
+
+function initMiniMap() {
+  miniMap = L.map('mini-map',{zoomControl:false,attributionControl:false}).setView([54,-2],5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(miniMap);
+}
+
+function makeIcon(type) {
+  const c = TYPE_COLORS[type]||'#00d8b5';
+  return L.divIcon({className:'',iconSize:[22,28],iconAnchor:[11,28],popupAnchor:[0,-30],
+    html:`<svg viewBox="0 0 22 28" xmlns="http://www.w3.org/2000/svg" width="22" height="28"><path d="M11 0C4.92 0 0 4.92 0 11c0 8.25 11 17 11 17s11-8.75 11-17C22 4.92 17.08 0 11 0z" fill="${c}"/><circle cx="11" cy="11" r="4.5" fill="white"/></svg>`});
+}
+
+async function loadInitiatives() {
+  try {
+    const {data,error} = await sb.from('community_initiatives').select('*').eq('status','active').order('name');
+    if (error) throw error;
+    allInits = data||[];
+    shownInits = [...allInits];
+    updateStats(allInits);
+    renderInits(shownInits);
+    plotInits(shownInits);
+  } catch(e) {
+    document.getElementById('initGrid').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Could not load</h3><p>${e.message}</p></div>`;
+  }
+}
+
+function updateStats(list) {
+  document.getElementById('sCnt').textContent   = list.length;
+  document.getElementById('sReuse').textContent  = list.filter(i=>i.type==='reuse_hub').length;
+  document.getElementById('sRepair').textContent = list.filter(i=>i.type==='repair_cafe').length;
+  document.getElementById('sTool').textContent   = list.filter(i=>i.type==='tool_library').length;
+}
+
+function renderInits(list) {
+  const grid = document.getElementById('initGrid');
+  if (!list.length) { grid.innerHTML = `<div class="empty-state"><div class="icon">🌿</div><h3>None found</h3><p>Try a different filter or <button onclick="openModal()" style="color:var(--orange);background:none;border:none;cursor:pointer;font-size:inherit">submit one</button>.</p></div>`; return; }
+  grid.innerHTML = list.map((it,i)=>{
+    const badge = `<span class="init-type-badge badge-${it.type}">${TYPE_ICONS[it.type]||''} ${TYPE_LABELS[it.type]||it.type}</span>`;
+    const dist  = it.distMi ? `<div class="init-dist">${it.distMi} mi away</div>` : '';
+    const link  = it.website ? `<a class="init-link" href="${it.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🌐 Website</a>` : '<span></span>';
+    return `<div class="init-card" style="animation-delay:${i*0.05}s" onclick="flyToInit(${it.latitude},${it.longitude})">
+      <div class="init-card-top ${it.type}"></div>
+      <div class="init-card-body">
+        ${badge}${dist}
+        <div class="init-name">${it.name}</div>
+        <div class="init-addr">📍 ${it.address||''}${it.postcode?', '+it.postcode:''}</div>
+        <div class="init-desc">${it.description||''}</div>
+      </div>
+      <div class="init-footer">${link}
+        <button class="btn-map-sm" onclick="event.stopPropagation();flyToInit(${it.latitude},${it.longitude})">🗺 Map</button>
+      </div></div>`;
+  }).join('');
+}
+
+function plotInits(list) {
+  markers.forEach(m=>m.remove()); markers=[];
+  list.forEach(it=>{
+    if (!it.latitude||!it.longitude) return;
+    const m = L.marker([it.latitude,it.longitude],{icon:makeIcon(it.type)}).addTo(miniMap);
+    m.bindPopup(`<div class="mpopup"><div class="mpopup-name">${it.name}</div><div class="mpopup-addr">${it.address||''}</div></div>`,{maxWidth:220});
+    markers.push(m);
+  });
+  if (list.filter(i=>i.latitude).length) {
+    miniMap.fitBounds(L.latLngBounds(list.filter(i=>i.latitude).map(i=>[i.latitude,i.longitude])),{padding:[20,20]});
+  }
+}
+
+function flyToInit(lat,lng) {
+  if (!lat||!lng) return;
+  miniMap.flyTo([lat,lng],14,{duration:.8});
+  document.getElementById('mini-map').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function filterType(type,btn) {
+  document.querySelectorAll('.type-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active'); activeType=type;
+  applyFilters();
+}
+
+function filterSearch() { applyFilters(); }
+
+function applyFilters() {
+  const q = document.getElementById('initSearch').value.trim().toLowerCase();
+  let list = activeType==='all' ? allInits : allInits.filter(i=>i.type===activeType);
+  if (q) list = list.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.postcode||'').toLowerCase().includes(q)||(i.address||'').toLowerCase().includes(q));
+  shownInits=list; renderInits(list); plotInits(list);
+}
+
+function locateUser() {
+  if (!navigator.geolocation){alert('Geolocation not supported.');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lng}=pos.coords;
+    const R=3958.8;
+    shownInits = allInits.map(i=>({...i,distMi:Math.round(2*R*Math.asin(Math.sqrt(Math.sin(((i.latitude-lat)*Math.PI/180)/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(i.latitude*Math.PI/180)*Math.sin(((i.longitude-lng)*Math.PI/180)/2)**2))*10)/10}))
+      .sort((a,b)=>a.distMi-b.distMi);
+    renderInits(shownInits); plotInits(shownInits);
+    miniMap.setView([lat,lng],11);
+  },()=>alert('Could not get location.'));
+}
+
+function openModal(){document.getElementById('modalOverlay').classList.add('open');document.getElementById('formBody').style.display='block';document.getElementById('formSuccess').style.display='none';document.body.style.overflow='hidden';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+
+async function submitInit(){
+  const name=document.getElementById('f-name').value.trim();
+  const postcode=document.getElementById('f-postcode').value.trim();
+  if(!name||!postcode){alert('Please fill in name and postcode.');return;}
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.textContent='Submitting…';
+  try{
+    const{error}=await sb.from('community_initiatives').insert({
+      name,postcode,type:document.getElementById('f-type').value,
+      address:document.getElementById('f-address').value.trim()||null,
+      website:document.getElementById('f-website').value.trim()||null,
+      description:document.getElementById('f-desc').value.trim()||null,
+      status:'pending'
+    });
+    if(error)throw error;
+    document.getElementById('formBody').style.display='none';
+    document.getElementById('formSuccess').style.display='block';
+  }catch(e){alert('Error: '+e.message);btn.disabled=false;btn.textContent='Submit for Review →';}
+}
+
+window.addEventListener('DOMContentLoaded',()=>{initMiniMap();loadInitiatives();});
+</script>
+</body>
+</html>

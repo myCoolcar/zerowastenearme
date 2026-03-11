@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading… — Zero Waste Near Me</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --amber:#ffbb53;--amber-d:#f0a830;--mint:#00d8b5;--mint-d:#00b89a;
+  --cyan:#00c1ef;--orange:#ff7646;--navy:#04455c;--navy-l:#0a5a78;
+  --teal:#1d93a3;--text:#1c2f38;--muted:#6b8c99;--border:#e0eff3;--light:#f4fbfa;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
+
+/* HEADER */
+.site-header{background:var(--amber);position:sticky;top:0;z-index:1000;box-shadow:0 2px 16px rgba(4,69,92,.18)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;max-width:1400px;margin:0 auto}
+.site-logo{display:flex;align-items:center;text-decoration:none}
+.logo-wordmark{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--navy);display:flex;align-items:center}
+.logo-pin{display:inline-flex;align-items:center;justify-content:center;position:relative;top:-1px}
+.logo-sub{display:block;font-family:'Quicksand',sans-serif;font-size:9.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--navy);opacity:.6;margin-top:2px}
+.site-nav{display:flex;align-items:center;gap:4px}
+.nav-link{font-size:13.5px;font-weight:500;color:var(--navy);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all .18s;opacity:.85}
+.nav-link:hover{background:rgba(4,69,92,.1);opacity:1}
+.nav-link.active{opacity:1;font-weight:600}
+.nav-link.cta{background:var(--navy);color:var(--amber);margin-left:8px;opacity:1;font-weight:600;padding:8px 18px}
+.nav-link.cta:hover{background:var(--navy-l)}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px}
+
+/* POST HERO */
+.post-hero{background:var(--navy);padding:52px 32px 0;position:relative;overflow:hidden}
+.post-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 80% at 80% 50%,rgba(0,216,181,.1) 0%,transparent 60%);pointer-events:none}
+.post-hero-inner{max-width:760px;margin:0 auto;position:relative;padding-bottom:52px}
+.breadcrumb{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;display:flex;align-items:center;gap:6px}
+.breadcrumb a{color:rgba(255,255,255,.4);text-decoration:none;transition:color .15s}
+.breadcrumb a:hover{color:var(--mint)}
+.breadcrumb span{color:rgba(255,255,255,.2)}
+.post-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.post-tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:rgba(0,216,181,.15);color:var(--mint);text-transform:uppercase;letter-spacing:.4px;border:1px solid rgba(0,216,181,.25)}
+.post-title-hero{font-family:'Quicksand',sans-serif;font-weight:700;font-size:clamp(26px,5vw,44px);color:white;line-height:1.15;margin-bottom:16px}
+.post-meta-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.post-author-chip{display:flex;align-items:center;gap:8px}
+.author-avatar{width:32px;height:32px;border-radius:50%;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--navy);flex-shrink:0}
+.author-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.8)}
+.post-date-chip{font-size:12px;color:rgba(255,255,255,.45)}
+.post-read-time{font-size:12px;color:rgba(255,255,255,.45)}
+
+/* ARTICLE */
+.article-outer{max-width:760px;margin:0 auto;padding:52px 28px 80px}
+.article-body{background:white;border-radius:18px;padding:48px 52px;box-shadow:0 4px 32px rgba(4,69,92,.07);border:1px solid var(--border);margin-bottom:40px}
+
+/* Prose styles */
+.article-body h2{font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin:36px 0 14px;line-height:1.25}
+.article-body h2:first-child{margin-top:0}
+.article-body h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin:28px 0 10px}
+.article-body p{font-family:'Lora',serif;font-size:16px;line-height:1.8;color:#2e4550;margin-bottom:20px}
+.article-body p:last-child{margin-bottom:0}
+.article-body ul,.article-body ol{font-family:'Lora',serif;font-size:16px;line-height:1.8;color:#2e4550;margin:0 0 20px 24px}
+.article-body li{margin-bottom:8px}
+.article-body a{color:var(--teal);font-weight:600;text-decoration:none;border-bottom:1.5px solid rgba(29,147,163,.25);transition:all .15s}
+.article-body a:hover{color:var(--orange);border-bottom-color:var(--orange)}
+.article-body blockquote{border-left:4px solid var(--mint);padding:16px 20px;margin:24px 0;background:rgba(0,216,181,.05);border-radius:0 10px 10px 0}
+.article-body blockquote p{font-style:italic;color:var(--navy);margin:0}
+.article-body strong{color:var(--navy);font-weight:600}
+.article-body hr{border:none;border-top:1.5px solid var(--border);margin:32px 0}
+.article-body img{width:100%;border-radius:10px;margin:16px 0}
+
+/* SHARE / NAV */
+.post-share{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:20px 0;border-top:1.5px solid var(--border);margin-bottom:0}
+.share-label{font-size:13px;font-weight:600;color:var(--muted)}
+.share-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;transition:all .15s;text-decoration:none}
+.share-btn:hover{border-color:var(--mint);color:var(--teal)}
+
+.post-nav{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+.post-nav-card{background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px 20px;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+.post-nav-card:hover{border-color:var(--mint);transform:translateY(-2px);box-shadow:0 6px 20px rgba(4,69,92,.09)}
+.pnc-dir{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.pnc-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px;color:var(--navy);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post-nav-card.next{text-align:right}
+
+/* LOADING / NOT FOUND */
+.loading-page{min-height:60vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;color:var(--muted)}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.not-found{text-align:center;padding:80px 28px}
+.not-found h2{font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;color:var(--navy);margin-bottom:10px}
+.not-found p{color:var(--muted);margin-bottom:20px}
+.btn-back{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;background:var(--mint);color:var(--navy);font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;border-radius:9px;text-decoration:none}
+
+/* FOOTER */
+.site-footer{background:var(--navy);padding:32px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:14px}
+.footer-links a{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--mint)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,.28)}
+
+@media(max-width:768px){
+  .site-nav{display:none}
+  .site-nav.open{display:flex;flex-direction:column;position:absolute;top:62px;left:0;right:0;background:var(--amber);padding:12px;gap:4px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:999}
+  .hamburger{display:flex}
+  .header-inner{position:relative}
+  .post-hero{padding:36px 20px 0}
+  .post-hero-inner{padding-bottom:36px}
+  .article-outer{padding:28px 14px 52px}
+  .article-body{padding:28px 22px}
+  .post-nav{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="site-logo" href="/">
+      <div>
+        <div class="logo-wordmark">Z<span>e</span>r<span class="logo-pin"><svg width="18" height="22" viewBox="0 0 18 22" xmlns="http://www.w3.org/2000/svg"><path d="M9 0C4.03 0 0 4.03 0 9c0 6.75 9 13 9 13s9-6.25 9-13c0-4.97-4.03-9-9-9z" fill="#04455c"/><circle cx="9" cy="9" r="3.5" fill="#ffbb53"/></svg></span>&nbsp;Waste Near Me</div>
+        <span class="logo-sub">UK Refill Directory</span>
+      </div>
+    </a>
+    <nav class="site-nav" id="siteNav">
+      <a class="nav-link" href="/pages/community">Community</a>
+      <a class="nav-link" href="/pages/locations">Locations</a>
+      <a class="nav-link" href="/pages/shops">Shops</a>
+      <a class="nav-link active" href="/pages/blog">Blog</a>
+      <a class="nav-link cta" href="/">+ Add to Map</a>
+    </nav>
+    <button class="hamburger" onclick="document.getElementById('siteNav').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div id="pageContent">
+  <div class="loading-page"><div class="spinner"></div><p>Loading post…</p></div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/">Home</a><a href="/pages/community">Community</a>
+    <a href="/pages/shops">Shops</a><a href="/pages/blog">Blog</a><a href="/">Contact</a>
+  </div>
+  <p class="footer-copy">© 2025 Zero Waste Near Me. All rights reserved.</p>
+</footer>
+
+<script>
+const SUPABASE_URL='https://xmrqlhkneffuqdibqrjj.supabase.co';
+const SUPABASE_KEY='sb_publishable_AV8VQGAwXuUT9PjiBYlWkA_f1z_J6RI';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// Resolve slug from URL:
+// Supports both /pages/blog/my-post (path) and ?slug=my-post (query)
+function getSlug(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('slug'))return params.get('slug');
+  const parts=window.location.pathname.replace(/\/+$/,'').split('/');
+  const last=parts[parts.length-1];
+  // 'post' is the template filename itself — need query param
+  if(last==='post'||last==='')return params.get('slug')||null;
+  return last;
+}
+
+function fmtDate(d){if(!d)return'';return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});}
+
+function readTime(html){
+  const words=(html||'').replace(/<[^>]+>/g,' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(1,Math.round(words/200))+' min read';
+}
+
+function initials(name){
+  return(name||'Z').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+}
+
+async function loadPost(){
+  const slug=getSlug();
+  if(!slug){showNotFound('No post specified.');return;}
+
+  const{data:posts,error}=await sb.from('blog_posts').select('*').eq('slug',slug).eq('status','published').limit(1);
+  if(error||!posts||!posts.length){showNotFound('Post not found.');return;}
+  const post=posts[0];
+  document.title=post.title+' — Zero Waste Near Me';
+
+  // Load adjacent posts for prev/next nav
+  const{data:all}=await sb.from('blog_posts').select('title,slug,published_at').eq('status','published').order('published_at',{ascending:false});
+  const idx=(all||[]).findIndex(p=>p.slug===slug);
+  const prev=idx>0?all[idx-1]:null;
+  const next=idx<(all||[]).length-1?all[idx+1]:null;
+
+  const tags=(post.tags||[]).map(t=>`<span class="post-tag">${t}</span>`).join('');
+
+  document.getElementById('pageContent').innerHTML=`
+    <section class="post-hero">
+      <div class="post-hero-inner">
+        <div class="breadcrumb">
+          <a href="/">Home</a><span>/</span>
+          <a href="/pages/blog">Blog</a><span>/</span>
+          <span style="color:rgba(255,255,255,.6)">${post.title}</span>
+        </div>
+        <div class="post-tags">${tags}</div>
+        <h1 class="post-title-hero">${post.title}</h1>
+        <div class="post-meta-row">
+          <div class="post-author-chip">
+            <div class="author-avatar">${initials(post.author)}</div>
+            <span class="author-name">${post.author||'Zero Waste Near Me'}</span>
+          </div>
+          <span class="post-date-chip">📅 ${fmtDate(post.published_at)}</span>
+          <span class="post-read-time">⏱ ${readTime(post.content)}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="article-outer">
+      <div class="article-body">
+        ${post.content||'<p>No content yet.</p>'}
+        <hr>
+        <div class="post-share">
+          <span class="share-label">Share this post:</span>
+          <a class="share-btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank" rel="noopener">𝕏 Twitter</a>
+          <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}" target="_blank" rel="noopener">Facebook</a>
+          <button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href);this.textContent='✓ Copied!'">🔗 Copy link</button>
+        </div>
+      </div>
+
+      <div class="post-nav">
+        ${next?`<a class="post-nav-card" href="/pages/blog/${next.slug}"><div class="pnc-dir">← Previous post</div><div class="pnc-title">${next.title}</div></a>`:'<div></div>'}
+        ${prev?`<a class="post-nav-card next" href="/pages/blog/${prev.slug}"><div class="pnc-dir">Next post →</div><div class="pnc-title">${prev.title}</div></a>`:'<div></div>'}
+      </div>
+    </div>`;
+}
+
+function showNotFound(msg){
+  document.title='Post Not Found — Zero Waste Near Me';
+  document.getElementById('pageContent').innerHTML=`
+    <div class="not-found">
+      <div style="font-size:56px;margin-bottom:16px">📭</div>
+      <h2>Post not found</h2>
+      <p>${msg}</p>
+      <a class="btn-back" href="/pages/blog">← Back to Blog</a>
+    </div>`;
+}
+
+window.addEventListener('DOMContentLoaded',loadPost);
+</script>
+</body>
+</html>

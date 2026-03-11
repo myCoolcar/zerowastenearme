@@ -23,10 +23,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);
 /* HEADER */
 .site-header{background:var(--amber);position:sticky;top:0;z-index:1000;box-shadow:0 2px 16px rgba(4,69,92,.18)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;max-width:1400px;margin:0 auto}
-.site-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-icon{width:36px;height:36px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 8px rgba(4,69,92,.3)}
-.logo-text{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);line-height:1.1}
-.logo-text span{display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;opacity:.7}
+.site-logo{display:flex;align-items:center;text-decoration:none}
+.logo-wordmark{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--navy);line-height:1;display:flex;align-items:center;gap:0}
+.logo-pin{display:inline-flex;align-items:center;justify-content:center;position:relative;top:-1px;margin:0 0px}
+.logo-pin svg{display:block}
+.logo-sub{display:block;font-family:'Quicksand',sans-serif;font-size:9.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--navy);opacity:.6;margin-top:2px}
 .site-nav{display:flex;align-items:center;gap:4px}
 .nav-link{font-size:13.5px;font-weight:500;color:var(--navy);text-decoration:none;padding:8px 14px;border-radius:8px;transition:all .18s;opacity:.85}
 .nav-link:hover{background:rgba(4,69,92,.1);opacity:1}
@@ -113,6 +114,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);
 .btn-show-map{font-size:12px;font-weight:600;color:var(--navy);background:none;border:1.5px solid var(--border);padding:5px 12px;border-radius:8px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:4px}
 .btn-show-map:hover{background:var(--mint);color:var(--navy);border-color:var(--mint)}
 
+/* IDLE / PROMPT STATE */
+.idle-state{grid-column:1/-1;text-align:center;padding:56px 20px}
+.idle-icon{margin-bottom:16px}
+.idle-state h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--navy);margin-bottom:8px}
+.idle-state p{font-size:14px;color:var(--muted);max-width:380px;margin:0 auto;line-height:1.6}
+.btn-show-all{display:inline-flex;align-items:center;gap:6px;background:white;color:var(--navy);border:1.5px solid var(--border);padding:12px 24px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s}
+.btn-show-all:hover{border-color:var(--mint);color:var(--teal);transform:translateY(-1px);box-shadow:0 4px 12px rgba(4,69,92,.1)}
+
 /* LOADING / EMPTY */
 .loading-state,.empty-state{text-align:center;padding:60px 20px;color:var(--muted);grid-column:1/-1}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
@@ -183,15 +192,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);
 
 <header class="site-header">
   <div class="header-inner">
-    <a class="site-logo" href="#">
-      <div class="logo-icon">&#9851;</div>
-      <div class="logo-text">Zero Waste Near Me<span>UK Refill Directory</span></div>
+    <a class="site-logo" href="/">
+      <div>
+        <div class="logo-wordmark">Z<span>e</span>r<span class="logo-pin"><svg width="18" height="22" viewBox="0 0 18 22" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M9 0C4.03 0 0 4.03 0 9c0 6.75 9 13 9 13s9-6.25 9-13c0-4.97-4.03-9-9-9z" fill="#04455c"/>
+          <circle cx="9" cy="9" r="3.5" fill="#ffbb53"/>
+          <line x1="9" y1="13" x2="9" y2="17" stroke="#04455c" stroke-width="1.5" stroke-linecap="round"/>
+        </svg></span>&nbsp;Waste Near Me</div>
+        <span class="logo-sub">UK Refill Directory</span>
+      </div>
     </a>
     <nav class="site-nav" id="siteNav">
-      <a class="nav-link" href="#">Community</a>
-      <a class="nav-link" href="#">Locations</a>
-      <a class="nav-link" href="#">Shops</a>
-      <a class="nav-link" href="#">Blog</a>
+      <a class="nav-link" href="/pages/community">Community</a>
+      <a class="nav-link" href="/pages/locations">Locations</a>
+      <a class="nav-link" href="/pages/shops">Shops</a>
+      <a class="nav-link" href="/pages/blog">Blog</a>
       <a class="nav-link cta" href="#" onclick="openModal();return false">+ Add to Map</a>
     </nav>
     <button class="hamburger" id="hamburger" onclick="toggleNav()" aria-label="Menu">
@@ -244,12 +259,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);
 <section class="directory" id="directory">
   <div class="directory-header">
     <div>
-      <h2 class="directory-title" id="directoryTitle">All Zero Waste Shops</h2>
-      <p class="directory-subtitle" id="directorySubtitle">Loading shops from the database&#8230;</p>
+      <h2 class="directory-title" id="directoryTitle">Find Shops Near You</h2>
+      <p class="directory-subtitle" id="directorySubtitle">Enter a postcode or use your location above to discover nearby zero waste shops.</p>
     </div>
     <div class="result-count" id="resultCount"></div>
   </div>
-  <div class="filter-row">
+  <div class="filter-row" id="filterRow" style="display:none">
     <button class="filter-chip active" onclick="filterByTag('all',this)">All</button>
     <button class="filter-chip" onclick="filterByTag('food refill',this)">&#127807; Food Refill</button>
     <button class="filter-chip" onclick="filterByTag('household refill',this)">&#129514; Household</button>
@@ -262,7 +277,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);
     &#9888;&#65039; <span id="errorMsg"></span>
   </div>
   <div class="shops-grid" id="shopsGrid">
-    <div class="loading-state"><div class="spinner"></div><p>Loading shops&#8230;</p></div>
+    <div class="idle-state" id="idleState">
+      <div class="idle-icon">
+        <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="28" cy="28" r="28" fill="rgba(0,216,181,.1)"/>
+          <path d="M28 10C19.16 10 12 17.16 12 26c0 13.5 16 20 16 20s16-6.5 16-20c0-8.84-7.16-16-16-16z" fill="#00d8b5"/>
+          <circle cx="28" cy="26" r="6" fill="white"/>
+        </svg>
+      </div>
+      <h3>Search to see nearby shops</h3>
+      <p>Type a postcode or town name above, or tap <strong>Use My Location</strong> to find the closest zero waste shops to you.</p>
+    </div>
+  </div>
+  <div id="showMoreWrap" style="display:none;text-align:center;margin-top:28px">
+    <a href="/pages/shops" class="btn-show-all">View all shops in the full directory &#8594;</a>
   </div>
 </section>
 
@@ -395,31 +423,34 @@ function buildPopup(s) {
        + '<div class="popup-tags">'+tags+'</div>'+link+'</div>';
 }
 
-// ── Load from Supabase ───────────────────────────
+// ── Load from Supabase (silent — no cards on initial load) ──
 async function loadShops() {
   try {
     const { data, error } = await sb.from('shops').select('*').eq('status','active').order('name');
     if (error) throw error;
     allShops = data || [];
-    shownShops = [...allShops];
+    shownShops = [];
     const cities = new Set(allShops.map(s=>(s.postcode||'').split(' ')[0]).filter(Boolean));
     document.getElementById('statTotal').textContent = allShops.length;
     document.getElementById('statCities').textContent = cities.size;
-    document.getElementById('directorySubtitle').textContent = 'Showing all '+allShops.length+' UK listings';
-    renderCards(shownShops);
-    plotShops(shownShops);
+    // Do NOT render cards or plot shops — wait for user to search
     hideError();
   } catch(err) {
     showError('Could not load shops: '+err.message);
-    document.getElementById('shopsGrid').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><h3>Database Error</h3><p>'+err.message+'</p></div>';
   }
 }
 
 // ── Render cards ─────────────────────────────────
 function renderCards(shops) {
-  document.getElementById('resultCount').innerHTML = '<strong>'+shops.length+'</strong> shop'+(shops.length!==1?'s':'')+' found';
+  document.getElementById('resultCount').innerHTML = shops.length
+    ? '<strong>'+shops.length+'</strong> shop'+(shops.length!==1?'s':'')+' found'
+    : '';
+  // Hide idle state once we have search results (even if empty)
+  const idle = document.getElementById('idleState');
+  if (idle) idle.style.display = 'none';
+
   if (!shops.length) {
-    document.getElementById('shopsGrid').innerHTML = '<div class="empty-state"><div class="icon">&#127807;</div><h3>No shops found</h3><p>Try a different search or <a href="#" onclick="openModal();return false" style="color:var(--orange)">add one to the map</a>.</p></div>';
+    document.getElementById('shopsGrid').innerHTML = '<div class="empty-state"><div class="icon">&#127807;</div><h3>No shops found nearby</h3><p>Try expanding the radius, or <a href="#" onclick="openModal();return false" style="color:var(--orange)">add one to the map</a>.</p></div>';
     return;
   }
   document.getElementById('shopsGrid').innerHTML = shops.map((s,i) => {
@@ -428,7 +459,7 @@ function renderCards(shops) {
     const link = s.website
       ? '<a class="shop-website" href="'+s.website+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#127760; '+s.website.replace(/^https?:\/\//,'')+'</a>'
       : '<span></span>';
-    return '<div class="shop-card" id="card-'+s.id+'" onclick="flyTo('+s.latitude+','+s.longitude+','+s.id+')" style="animation-delay:'+Math.min(i,12)*0.04+'s">'
+    return '<div class="shop-card" id="card-'+s.id+'" onclick="flyTo('+s.latitude+','+s.longitude+','+s.id+')" style="animation-delay:'+i*0.06+'s">'
       + '<div class="shop-card-accent"></div>'
       + '<div class="shop-card-body">'
       + '<div class="shop-card-top"><div class="shop-name">'+s.name+'</div>'+dist+'</div>'
@@ -460,26 +491,30 @@ function highlightCard(id) {
 // ── Search ───────────────────────────────────────
 async function doSearch() {
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  if (!q) {
-    shownShops = [...allShops];
-    document.getElementById('directoryTitle').textContent = 'All Zero Waste Shops';
-    document.getElementById('directorySubtitle').textContent = 'Showing all '+allShops.length+' UK listings';
-    applyTagFilter(shownShops); return;
+  if (!q) return;
+
+  // Always try postcode geocode first (covers "E1 6RF", "SW1A", "Manchester", etc.)
+  if (/^[a-z]{1,2}\d/i.test(q)) {
+    await searchByPostcode(q); return;
   }
-  // Text match
+
+  // Text match on name / address / tags — cap at 5
   let results = allShops.filter(s =>
     (s.name||'').toLowerCase().includes(q) ||
     (s.address||'').toLowerCase().includes(q) ||
-    (s.postcode||'').toLowerCase().replace(' ','').includes(q.replace(' ','')) ||
     (s.tags||[]).some(t=>t.includes(q))
-  );
-  // If looks like postcode and no text results, geocode it
-  if (!results.length && /^[a-z]{1,2}\d/i.test(q)) {
+  ).slice(0,5);
+
+  if (!results.length) {
+    // Last resort — try geocoding as a town name via postcodes.io
     await searchByPostcode(q); return;
   }
+
   shownShops = results;
   document.getElementById('directoryTitle').textContent = 'Results for "'+document.getElementById('searchInput').value+'"';
-  document.getElementById('directorySubtitle').textContent = results.length+' matching shop'+(results.length!==1?'s':'');
+  document.getElementById('directorySubtitle').textContent = 'Showing up to 5 matching shops';
+  document.getElementById('filterRow').style.display = 'flex';
+  document.getElementById('showMoreWrap').style.display = 'block';
   applyTagFilter(shownShops);
   document.getElementById('directory').scrollIntoView({behavior:'smooth'});
 }
@@ -497,14 +532,17 @@ function filterByDistance(lat,lng) {
   const max = parseFloat(document.getElementById('radiusSelect').value);
   const nearby = allShops
     .map(s=>({...s,distMi:haversine(lat,lng,s.latitude,s.longitude)}))
-    .filter(s=>s.distMi<=max).sort((a,b)=>a.distMi-b.distMi);
+    .filter(s=>s.distMi<=max).sort((a,b)=>a.distMi-b.distMi)
+    .slice(0,5); // show closest 5 only
   shownShops = nearby;
-  document.getElementById('directoryTitle').textContent = 'Shops Near You';
-  document.getElementById('directorySubtitle').textContent = 'Within '+max+' miles · '+nearby.length+' shop'+(nearby.length!==1?'s':'')+' found';
+  document.getElementById('directoryTitle').textContent = 'Nearest Shops to You';
+  document.getElementById('directorySubtitle').textContent = 'Showing the 5 closest within '+max+' miles';
+  document.getElementById('filterRow').style.display = 'flex';
+  document.getElementById('showMoreWrap').style.display = nearby.length > 0 ? 'block' : 'none';
   applyTagFilter(shownShops);
   if (nearby.length) {
     const b = L.latLngBounds(nearby.filter(s=>s.latitude).map(s=>[s.latitude,s.longitude]));
-    map.fitBounds(b,{padding:[40,40]});
+    map.fitBounds(b,{padding:[60,60]});
   }
   document.getElementById('directory').scrollIntoView({behavior:'smooth'});
 }
@@ -525,15 +563,15 @@ function applyTagFilter(shops) {
 function locateUser() {
   if (!navigator.geolocation){alert('Geolocation not supported.');return;}
   const btn=document.querySelector('.btn-locate');
-  btn.textContent='&#9203; Locating…';btn.disabled=true;
+  btn.innerHTML='&#9203; Locating&#8230;';btn.disabled=true;
   navigator.geolocation.getCurrentPosition(pos=>{
-    btn.textContent='&#128205; Use My Location';btn.disabled=false;
+    btn.innerHTML='&#128205; Use My Location';btn.disabled=false;
     const {latitude:lat,longitude:lng}=pos.coords;
     if (userMarker) userMarker.remove();
     userMarker=L.marker([lat,lng],{icon:youIcon}).addTo(map).bindPopup('<b>You are here</b>').openPopup();
-    filterByDistance(lat,lng);
     map.setView([lat,lng],11);
-  },()=>{btn.textContent='&#128205; Use My Location';btn.disabled=false;alert('Could not get location. Try searching by postcode.');});
+    filterByDistance(lat,lng);
+  },()=>{btn.innerHTML='&#128205; Use My Location';btn.disabled=false;alert('Could not get location. Try searching by postcode.');});
 }
 
 function haversine(lat1,lon1,lat2,lon2){

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Waste Near Me — Bulk Shop Importer</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --amber:#ffbb53; --mint:#00d8b5; --mint-d:#00b89a; --cyan:#00c1ef;
+  --orange:#ff7646; --navy:#04455c; --navy-l:#0a5a78; --teal:#1d93a3;
+  --red:#e74c3c; --green:#27ae60; --yellow:#f39c12;
+  --border:#e0eff3; --light:#f4fbfa; --text:#1c2f38; --muted:#6b8c99;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text);min-height:100vh}
+
+/* HEADER */
+.header{background:var(--amber);padding:0 32px;height:58px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(4,69,92,.18)}
+.header-logo{width:32px;height:32px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
+.header h1{font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:var(--navy)}
+.header p{font-size:12px;color:var(--navy);opacity:.65;margin-left:auto}
+
+/* LAYOUT */
+.container{max-width:1100px;margin:0 auto;padding:36px 28px 60px}
+.page-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:var(--navy);margin-bottom:6px}
+.page-sub{color:var(--muted);font-size:14px;margin-bottom:36px}
+
+/* STEPS */
+.steps{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;margin-bottom:40px;border-radius:12px;overflow:hidden;border:1.5px solid var(--border)}
+.step{padding:16px 18px;background:white;border-right:1.5px solid var(--border);position:relative}
+.step:last-child{border-right:none}
+.step.active{background:var(--navy)}
+.step.done{background:var(--mint)}
+.step-num{font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:var(--border);margin-bottom:2px}
+.step.active .step-num{color:var(--amber)}
+.step.done .step-num{color:white}
+.step-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.step.active .step-label{color:rgba(255,255,255,.7)}
+.step.done .step-label{color:white;opacity:.85}
+
+/* CARDS */
+.card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:28px;margin-bottom:24px;display:none}
+.card.visible{display:block}
+.card-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin-bottom:6px}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* DROPZONE */
+.dropzone{border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--light)}
+.dropzone:hover,.dropzone.dragover{border-color:var(--mint);background:rgba(0,216,181,.05)}
+.dropzone-icon{font-size:40px;margin-bottom:12px}
+.dropzone h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:var(--navy);margin-bottom:6px}
+.dropzone p{font-size:13px;color:var(--muted);margin-bottom:16px}
+.btn-browse{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:white;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-browse:hover{background:var(--navy-l)}
+#fileInput{display:none}
+
+/* FORMAT HINT */
+.format-hint{background:#f8fdff;border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:20px}
+.format-hint h4{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.format-hint code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);background:rgba(0,193,239,.08);padding:8px 12px;border-radius:6px;display:block;line-height:1.8;white-space:pre-wrap}
+.format-hint p{font-size:12px;color:var(--muted);margin-top:8px}
+
+/* COLUMN MAPPING */
+.mapping-grid{display:grid;grid-template-columns:1fr 24px 1fr;gap:8px 12px;align-items:center;margin-bottom:20px}
+.mapping-label{font-size:13px;font-weight:600;color:var(--navy)}
+.mapping-arrow{color:var(--muted);text-align:center;font-size:16px}
+.mapping-select{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:white;outline:none;cursor:pointer}
+.mapping-select:focus{border-color:var(--mint)}
+.mapping-req{color:var(--orange);font-size:11px;margin-left:4px}
+.mapping-hint{grid-column:3;font-size:11px;color:var(--muted);margin-top:-4px;margin-bottom:4px}
+
+/* PREVIEW TABLE */
+.preview-wrap{overflow-x:auto;margin-bottom:20px;border-radius:10px;border:1.5px solid var(--border)}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px}
+.preview-table th{background:var(--navy);color:white;padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap}
+.preview-table td{padding:9px 14px;border-bottom:1px solid var(--border);background:white;vertical-align:top;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preview-table tr:last-child td{border-bottom:none}
+.preview-table tr:hover td{background:#f8fdff}
+.cell-missing{color:#bbb;font-style:italic}
+
+/* PROGRESS */
+.progress-section{margin-bottom:20px}
+.progress-label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.progress-bar{height:10px;background:var(--border);border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--mint),var(--cyan));border-radius:10px;transition:width .3s;width:0%}
+.log-box{background:#0d1f27;border-radius:10px;padding:16px;height:220px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8}
+.log-line{display:block;padding:1px 0}
+.log-info{color:#a8d8e8}
+.log-ok{color:#00d8b5}
+.log-warn{color:#ffbb53}
+.log-err{color:#ff7070}
+.log-dim{color:#4d7a89}
+
+/* RESULTS SUMMARY */
+.results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.result-box{background:white;border-radius:12px;padding:20px;text-align:center;border:1.5px solid var(--border)}
+.result-num{font-family:'Quicksand',sans-serif;font-weight:700;font-size:32px;display:block;margin-bottom:4px}
+.result-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.result-box.ok .result-num{color:var(--green)}
+.result-box.warn .result-num{color:var(--yellow)}
+.result-box.err .result-num{color:var(--red)}
+.result-box.info .result-num{color:var(--teal)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--mint);color:var(--navy)}
+.btn-primary:hover{background:var(--mint-d)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:white;color:var(--navy);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--mint)}
+.btn-danger{background:var(--red);color:white}
+.btn-danger:hover{background:#c0392b}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;align-items:center}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;text-transform:uppercase;letter-spacing:.3px}
+.badge-ok{background:rgba(39,174,96,.15);color:var(--green)}
+.badge-warn{background:rgba(243,156,18,.15);color:var(--yellow)}
+.badge-err{background:rgba(231,76,60,.15);color:var(--red)}
+
+/* ALERT */
+.alert{padding:14px 18px;border-radius:10px;font-size:13px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px}
+.alert-info{background:#e8f8ff;border:1px solid #b3e5fc;color:#0277bd}
+.alert-warn{background:#fff8e1;border:1px solid #ffe082;color:#e65100}
+.alert-success{background:#e8f5e9;border:1px solid #a5d6a7;color:#1b5e20}
+
+/* MISC */
+.divider{height:1px;background:var(--border);margin:20px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.field-group label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.field-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.field-input:focus{border-color:var(--mint)}
+.small{font-size:12px;color:var(--muted);margin-top:4px}
+
+@media(max-width:700px){
+  .steps{grid-template-columns:1fr 1fr}
+  .results-grid{grid-template-columns:1fr 1fr}
+  .mapping-grid{grid-template-columns:1fr}
+  .mapping-arrow{display:none}
+  .field-row{grid-template-columns:1fr}
+  .container{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">♻</div>
+  <h1>Bulk Shop Importer</h1>
+  <p>Zero Waste Near Me</p>
+</div>
+
+<div class="container">
+  <h2 class="page-title">Import Shops from CSV</h2>
+  <p class="page-sub">Upload a CSV file of zero waste shops. Missing coordinates are automatically geocoded using UK postcodes.</p>
+
+  <!-- Step indicators -->
+  <div class="steps" id="stepsBar">
+    <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Upload CSV</div></div>
+    <div class="step" id="step2"><div class="step-num">2</div><div class="step-label">Map Columns</div></div>
+    <div class="step" id="step3"><div class="step-num">3</div><div class="step-label">Preview</div></div>
+    <div class="step" id="step4"><div class="step-num">4</div><div class="step-label">Import</div></div>
+  </div>
+
+  <!-- ── CARD 1: Upload ─────────────────────── -->
+  <div class="card visible" id="card1">
+    <div class="card-title">Upload your CSV file</div>
+    <div class="card-sub">Drag and drop a .csv file, or click to browse. The file stays on your computer — nothing is sent until you confirm the import.</div>
+
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="handleDrop(event)">
+      <div class="dropzone-icon">📄</div>
+      <h3>Drop your CSV here</h3>
+      <p id="dropzoneMsg">Supports any column names — you'll map them in the next step</p>
+      <button class="btn-browse" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Browse file</button>
+    </div>
+    <input type="file" id="fileInput" accept=".csv" onchange="handleFile(this.files[0])">
+
+    <div class="format-hint">
+      <h4>Expected CSV format (column names can vary)</h4>
+      <code>name, address, postcode, latitude, longitude, website, description, tags
+The Refill Pantry, 14 Brick Lane London, E1 6RF, 51.521, -0.071, https://..., A zero waste grocery..., food refill|household
+Edinburgh Eco Store, 22 Grassmarket Edinburgh, EH1 2JU, , , https://..., Scotland's favourite..., food refill|beauty</code>
+      <p>💡 Latitude/longitude are optional — missing coordinates will be geocoded from the postcode automatically. Tags should be pipe-separated (food refill|household refill) or comma-separated.</p>
+    </div>
+  </div>
+
+  <!-- ── CARD 2: Column mapping ─────────────── -->
+  <div class="card" id="card2">
+    <div class="card-title">Map your CSV columns</div>
+    <div class="card-sub">Match your CSV's column headers to the database fields. We've auto-detected likely matches — check they look right.</div>
+
+    <div class="mapping-grid" id="mappingGrid">
+      <!-- Filled by JS -->
+    </div>
+
+    <div class="divider"></div>
+    <div class="card-title" style="font-size:15px;margin-bottom:6px">Default values for missing data</div>
+    <p class="card-sub" style="margin-bottom:16px">These values apply when a row is missing that field.</p>
+    <div class="field-row">
+      <div class="field-group">
+        <label>Default tags (pipe-separated)</label>
+        <input class="field-input" type="text" id="defaultTags" placeholder="food refill|household refill">
+        <p class="small">Applied to rows with no tags column</p>
+      </div>
+      <div class="field-group">
+        <label>Default status</label>
+        <select class="field-input" id="defaultStatus">
+          <option value="active">active — visible on the map immediately</option>
+          <option value="pending">pending — needs review before appearing</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="buildPreview()">Preview import →</button>
+    </div>
+  </div>
+
+  <!-- ── CARD 3: Preview ────────────────────── -->
+  <div class="card" id="card3">
+    <div class="card-title">Preview</div>
+    <div class="card-sub" id="previewSub">Showing first 10 rows. Review before importing.</div>
+
+    <div id="previewAlerts"></div>
+    <div class="preview-wrap">
+      <table class="preview-table" id="previewTable"></table>
+    </div>
+
+    <div id="geocodeNote" class="alert alert-info" style="display:none">
+      🌍 <span id="geocodeNoteText"></span> rows are missing coordinates and will be geocoded from their postcodes using <strong>postcodes.io</strong> (free, no API key needed). This happens automatically during import.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-primary" id="btnStartImport" onclick="startImport()">Start Import →</button>
+      <span id="previewCount" style="font-size:13px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <!-- ── CARD 4: Import progress ────────────── -->
+  <div class="card" id="card4">
+    <div class="card-title">Importing…</div>
+    <div class="card-sub" id="importStatus">Preparing import…</div>
+
+    <div class="progress-section">
+      <div class="progress-label">
+        <span id="progressLabel">0 / 0</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="log-box" id="logBox"></div>
+
+    <div id="resultsSection" style="display:none;margin-top:28px">
+      <div class="card-title" style="margin-bottom:20px">Import Complete</div>
+      <div class="results-grid">
+        <div class="result-box ok"><span class="result-num" id="rInserted">0</span><span class="result-label">Inserted</span></div>
+        <div class="result-box warn"><span class="result-num" id="rSkipped">0</span><span class="result-label">Skipped (dupe)</span></div>
+        <div class="result-box info"><span class="result-num" id="rGeocoded">0</span><span class="result-label">Geocoded</span></div>
+        <div class="result-box err"><span class="result-num" id="rErrors">0</span><span class="result-label">Errors</span></div>
+      </div>
+      <div class="alert alert-success" id="successMsg" style="display:none">
+        ✅ <span id="successText"></span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="location.reload()">Import another file</button>
+        <a class="btn btn-secondary" href="zero-waste-near-me.html">← Back to site</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIG — Supabase
+══════════════════════════════════════════ */
+const SUPABASE_URL = 'https://xmrqlhkneffuqdibqrjj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_AV8VQGAwXuUT9PjiBYlWkA_f1z_J6RI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let csvHeaders = [];
+let csvRows    = [];
+let mapping    = {};   // { dbField: csvColumn }
+let parsedRows = [];   // after mapping applied
+
+const DB_FIELDS = [
+  { key:'name',        label:'Shop Name',    req:true  },
+  { key:'postcode',    label:'Postcode',     req:true  },
+  { key:'address',     label:'Address',      req:false },
+  { key:'website',     label:'Website',      req:false },
+  { key:'description', label:'Description',  req:false },
+  { key:'tags',        label:'Tags',         req:false },
+  { key:'latitude',    label:'Latitude',     req:false },
+  { key:'longitude',   label:'Longitude',    req:false },
+];
+
+/* Fuzzy auto-detect column names */
+const SYNONYMS = {
+  name:        ['name','shop','title','shop name','store','business'],
+  postcode:    ['postcode','post code','postal','zip','pc'],
+  address:     ['address','addr','street','location','full address'],
+  website:     ['website','web','url','site','link','www'],
+  description: ['description','desc','about','info','details','notes'],
+  tags:        ['tags','tag','category','categories','type','types'],
+  latitude:    ['latitude','lat','y'],
+  longitude:   ['longitude','lng','lon','long','x'],
+};
+
+function autoDetect(headers) {
+  const result = {};
+  DB_FIELDS.forEach(f => {
+    const synonyms = SYNONYMS[f.key] || [];
+    const match = headers.find(h => synonyms.includes(h.toLowerCase().trim()));
+    result[f.key] = match || '';
+  });
+  return result;
+}
+
+/* ══════════════════════════════════════════
+   STEP NAVIGATION
+══════════════════════════════════════════ */
+function goStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('card'+i).classList.toggle('visible', i === n);
+    const s = document.getElementById('step'+i);
+    s.classList.remove('active','done');
+    if (i < n) s.classList.add('done');
+    if (i === n) s.classList.add('active');
+  }
+}
+
+/* ══════════════════════════════════════════
+   FILE HANDLING
+══════════════════════════════════════════ */
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.csv')) handleFile(file);
+  else alert('Please drop a .csv file.');
+}
+
+function handleFile(file) {
+  if (!file) return;
+  document.getElementById('dropzoneMsg').textContent = '⏳ Parsing ' + file.name + '…';
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete(results) {
+      csvHeaders = results.meta.fields || [];
+      csvRows    = results.data;
+      document.getElementById('dropzoneMsg').textContent =
+        '✅ ' + file.name + ' — ' + csvRows.length.toLocaleString() + ' rows detected';
+      buildMappingUI();
+      goStep(2);
+    },
+    error(err) { alert('CSV parse error: ' + err.message); }
+  });
+}
+
+/* ══════════════════════════════════════════
+   COLUMN MAPPING UI
+══════════════════════════════════════════ */
+function buildMappingUI() {
+  mapping = autoDetect(csvHeaders);
+  const grid = document.getElementById('mappingGrid');
+  grid.innerHTML = '';
+
+  DB_FIELDS.forEach(f => {
+    // Label
+    const lbl = document.createElement('div');
+    lbl.className = 'mapping-label';
+    lbl.innerHTML = f.label + (f.req ? '<span class="mapping-req">*</span>' : '');
+    grid.appendChild(lbl);
+    // Arrow
+    const arr = document.createElement('div');
+    arr.className = 'mapping-arrow';
+    arr.textContent = '→';
+    grid.appendChild(arr);
+    // Select
+    const sel = document.createElement('select');
+    sel.className = 'mapping-select';
+    sel.id = 'map_' + f.key;
+    const blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = f.req ? '— Required —' : '(not mapped)';
+    sel.appendChild(blank);
+    csvHeaders.forEach(h => {
+      const opt = document.createElement('option');
+      opt.value = h;
+      opt.textContent = h;
+      if (mapping[f.key] === h) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    grid.appendChild(sel);
+  });
+}
+
+/* ══════════════════════════════════════════
+   PREVIEW
+══════════════════════════════════════════ */
+function buildPreview() {
+  // Read mapping from UI
+  DB_FIELDS.forEach(f => {
+    mapping[f.key] = document.getElementById('map_' + f.key).value;
+  });
+  if (!mapping.name) { alert('Please map the Shop Name column.'); return; }
+  if (!mapping.postcode) { alert('Please map the Postcode column.'); return; }
+
+  // Apply mapping to rows
+  parsedRows = csvRows.map(row => {
+    const tags = parseTags(getField(row, mapping.tags));
+    return {
+      name:        (getField(row, mapping.name) || '').trim(),
+      postcode:    (getField(row, mapping.postcode) || '').trim().toUpperCase(),
+      address:     (getField(row, mapping.address) || '').trim() || null,
+      website:     normaliseURL(getField(row, mapping.website)),
+      description: (getField(row, mapping.description) || '').trim() || null,
+      tags:        tags.length ? tags : parseTags(document.getElementById('defaultTags').value),
+      latitude:    parseFloat(getField(row, mapping.latitude)) || null,
+      longitude:   parseFloat(getField(row, mapping.longitude)) || null,
+      status:      document.getElementById('defaultStatus').value,
+    };
+  }).filter(r => r.name && r.postcode);
+
+  const missingCoords = parsedRows.filter(r => !r.latitude || !r.longitude).length;
+  const noName        = csvRows.length - parsedRows.length;
+
+  // Alerts
+  const alertBox = document.getElementById('previewAlerts');
+  alertBox.innerHTML = '';
+  if (noName > 0) alertBox.innerHTML += alert('warn', `⚠️ ${noName} rows skipped — missing name or postcode.`);
+
+  // Geocode notice
+  const note = document.getElementById('geocodeNote');
+  if (missingCoords > 0) {
+    document.getElementById('geocodeNoteText').textContent = missingCoords.toLocaleString();
+    note.style.display = 'flex';
+  } else { note.style.display = 'none'; }
+
+  // Preview table (first 10)
+  const preview = parsedRows.slice(0, 10);
+  const cols = ['name','postcode','address','website','tags','latitude','longitude','status'];
+  const table = document.getElementById('previewTable');
+  table.innerHTML = '<thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead>'
+    + '<tbody>' + preview.map(r =>
+        '<tr>' + cols.map(c => {
+          let v = c === 'tags' ? (r.tags||[]).join(', ') : (r[c] ?? '');
+          const cls = !v ? ' class="cell-missing"' : '';
+          return `<td${cls}>${v || '<em>—</em>'}</td>`;
+        }).join('') + '</tr>'
+      ).join('') + '</tbody>';
+
+  document.getElementById('previewSub').textContent =
+    `Showing first 10 of ${parsedRows.length.toLocaleString()} rows to be imported.`;
+  document.getElementById('previewCount').textContent =
+    parsedRows.length.toLocaleString() + ' rows ready';
+
+  goStep(3);
+}
+
+function alert(type, msg) {
+  return `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+function getField(row, col) { return col ? (row[col] || '') : ''; }
+
+function parseTags(raw) {
+  if (!raw) return [];
+  const sep = raw.includes('|') ? '|' : ',';
+  return raw.split(sep).map(t => t.trim().toLowerCase()).filter(Boolean);
+}
+
+function normaliseURL(url) {
+  if (!url) return null;
+  url = url.trim();
+  if (!url) return null;
+  if (!url.startsWith('http')) url = 'https://' + url;
+  return url;
+}
+
+/* ══════════════════════════════════════════
+   GEOCODING via postcodes.io (batch)
+══════════════════════════════════════════ */
+async function geocodeBatch(postcodes) {
+  // postcodes.io batch: max 100 per call
+  const results = {};
+  const chunks = chunkArray([...new Set(postcodes)], 100);
+  for (const chunk of chunks) {
+    try {
+      const res = await fetch('https://api.postcodes.io/postcodes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postcodes: chunk })
+      });
+      const json = await res.json();
+      (json.result || []).forEach(item => {
+        if (item.result) {
+          results[item.query.toUpperCase()] = {
+            lat: item.result.latitude,
+            lng: item.result.longitude
+          };
+        }
+      });
+    } catch(e) {
+      log('err', 'Geocode batch failed: ' + e.message);
+    }
+  }
+  return results;
+}
+
+/* ══════════════════════════════════════════
+   IMPORT
+══════════════════════════════════════════ */
+let stats = { inserted:0, skipped:0, geocoded:0, errors:0 };
+
+async function startImport() {
+  document.getElementById('btnStartImport').disabled = true;
+  goStep(4);
+  stats = { inserted:0, skipped:0, geocoded:0, errors:0 };
+  document.getElementById('logBox').innerHTML = '';
+  document.getElementById('resultsSection').style.display = 'none';
+
+  const total = parsedRows.length;
+  log('info', `Starting import of ${total.toLocaleString()} shops…`);
+
+  // 1. Geocode missing coordinates
+  const needsGeocode = parsedRows.filter(r => !r.latitude || !r.longitude);
+  if (needsGeocode.length > 0) {
+    log('info', `Geocoding ${needsGeocode.length} postcodes via postcodes.io…`);
+    const postcodeList = needsGeocode.map(r => r.postcode);
+    const geoMap = await geocodeBatch(postcodeList);
+    log('info', `Geocoded ${Object.keys(geoMap).length} of ${needsGeocode.length} postcodes`);
+
+    parsedRows.forEach(r => {
+      if (!r.latitude || !r.longitude) {
+        const g = geoMap[r.postcode];
+        if (g) { r.latitude = g.lat; r.longitude = g.lng; stats.geocoded++; }
+        else log('warn', `Could not geocode: ${r.postcode} (${r.name})`);
+      }
+    });
+  }
+
+  // 2. Fetch existing (name+postcode) to detect dupes
+  log('info', 'Checking for duplicates…');
+  let existingSet = new Set();
+  try {
+    const { data } = await sb.from('shops').select('name,postcode');
+    (data||[]).forEach(s => existingSet.add(key(s.name, s.postcode)));
+  } catch(e) { log('warn', 'Could not check dupes: ' + e.message); }
+
+  // 3. Insert in batches of 50
+  const BATCH = 50;
+  const toInsert = parsedRows.filter(r => {
+    if (existingSet.has(key(r.name, r.postcode))) {
+      log('dim', `SKIP (dupe): ${r.name} ${r.postcode}`);
+      stats.skipped++;
+      return false;
+    }
+    return true;
+  });
+
+  log('info', `${toInsert.length} new shops to insert (${stats.skipped} duplicates skipped)`);
+
+  const batches = chunkArray(toInsert, BATCH);
+  let done = 0;
+
+  for (const batch of batches) {
+    try {
+      const { error } = await sb.from('shops').insert(batch);
+      if (error) throw error;
+      done += batch.length;
+      stats.inserted += batch.length;
+      batch.forEach(r => log('ok', `✓ ${r.name} (${r.postcode})`));
+    } catch(e) {
+      log('err', `Batch failed: ${e.message}`);
+      stats.errors += batch.length;
+      done += batch.length;
+    }
+    updateProgress(done + stats.skipped, total);
+  }
+
+  finishImport(total);
+}
+
+function key(name, pc) {
+  return (name||'').toLowerCase().trim() + '|' + (pc||'').replace(' ','').toLowerCase();
+}
+
+function updateProgress(done, total) {
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = done + ' / ' + total;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function finishImport(total) {
+  updateProgress(total, total);
+  document.getElementById('importStatus').textContent = 'Import complete!';
+  document.getElementById('rInserted').textContent = stats.inserted.toLocaleString();
+  document.getElementById('rSkipped').textContent  = stats.skipped.toLocaleString();
+  document.getElementById('rGeocoded').textContent = stats.geocoded.toLocaleString();
+  document.getElementById('rErrors').textContent   = stats.errors.toLocaleString();
+  document.getElementById('resultsSection').style.display = 'block';
+
+  if (stats.errors === 0) {
+    document.getElementById('successMsg').style.display = 'flex';
+    document.getElementById('successText').textContent =
+      `${stats.inserted.toLocaleString()} shops successfully imported into your Supabase database. They'll appear on the map immediately.`;
+  }
+  log('ok', `Done! ${stats.inserted} inserted · ${stats.skipped} skipped · ${stats.geocoded} geocoded · ${stats.errors} errors`);
+}
+
+/* ══════════════════════════════════════════
+   LOG HELPER
+══════════════════════════════════════════ */
+function log(type, msg) {
+  const box = document.getElementById('logBox');
+  const line = document.createElement('span');
+  line.className = 'log-line log-' + type;
+  const time = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  line.textContent = '[' + time + '] ' + msg;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function chunkArray(arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i+size));
+  return chunks;
+}
+</script>
+</body>
+</html>

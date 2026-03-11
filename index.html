@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Waste Near Me — Architecture & Live Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;600;700&family=Work+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --mint:    #00d8b5;
+    --cyan:    #00c1ef;
+    --orange:  #ff7646;
+    --navy:    #04455c;
+    --amber:   #ffbb53;
+    --teal:    #1d93a3;
+    --light:   #f0fafa;
+    --white:   #ffffff;
+    --text:    #1a2e35;
+    --muted:   #6b8a94;
+    --border:  #d4eef0;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Work Sans', sans-serif; background: var(--light); color: var(--text); }
+
+  /* ── TOP NAV ────────────────────────────────────── */
+  .top-nav {
+    background: var(--navy);
+    display: flex; align-items: center; gap: 0;
+    padding: 0 0 0 24px; position: sticky; top: 0; z-index: 1000;
+    box-shadow: 0 2px 12px rgba(4,69,92,.35);
+  }
+  .nav-logo {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700; font-size: 15px; color: var(--mint);
+    letter-spacing: .5px; padding: 14px 20px 14px 0;
+    border-right: 1px solid rgba(255,255,255,.1);
+    white-space: nowrap;
+  }
+  .nav-logo span { color: var(--amber); }
+  .tab-bar { display: flex; flex: 1; }
+  .tab {
+    padding: 14px 22px; font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,.55); cursor: pointer; border: none;
+    background: none; border-bottom: 3px solid transparent;
+    transition: all .2s; white-space: nowrap; letter-spacing: .3px;
+  }
+  .tab:hover { color: rgba(255,255,255,.85); }
+  .tab.active { color: var(--mint); border-bottom-color: var(--mint); }
+  .tab-badge {
+    display: inline-block; background: var(--orange);
+    color: white; font-size: 9px; font-weight: 700;
+    padding: 1px 5px; border-radius: 8px; margin-left: 5px;
+    vertical-align: middle;
+  }
+
+  /* ── PANELS ─────────────────────────────────────── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ══════════════════════════════════════════════════
+     PANEL 1: LIVE PREVIEW
+  ══════════════════════════════════════════════════ */
+  .site-wrap { min-height: calc(100vh - 49px); }
+
+  /* Site header */
+  .site-header {
+    background: var(--navy); padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .site-logo { font-family:'Quicksand',sans-serif; font-weight:700; font-size:20px; color:white; }
+  .site-logo em { font-style:normal; color:var(--mint); }
+  .site-nav a {
+    color:rgba(255,255,255,.7); text-decoration:none; font-size:13px;
+    margin-left:20px; font-weight:500; transition:color .2s;
+  }
+  .site-nav a:hover { color:var(--mint); }
+
+  /* Hero map */
+  #leaflet-map { width:100%; height:420px; z-index:1; }
+
+  /* Search bar */
+  .search-section {
+    background: var(--orange); padding: 28px 0;
+  }
+  .search-inner { max-width:860px; margin:0 auto; padding:0 24px; }
+  .search-title {
+    font-family:'Quicksand',sans-serif; font-weight:700;
+    font-size:28px; color:white; margin-bottom:16px;
+    text-shadow:0 1px 4px rgba(0,0,0,.2);
+  }
+  .search-row {
+    display:flex; gap:10px; flex-wrap:wrap;
+  }
+  .search-input-wrap {
+    flex:1; min-width:220px; position:relative;
+  }
+  .search-input {
+    width:100%; padding:13px 18px; border-radius:8px;
+    border:none; font-size:15px; font-family:'Work Sans',sans-serif;
+    outline:none; box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+  .search-input:focus { box-shadow:0 0 0 3px var(--amber); }
+  .radius-select {
+    padding:13px 14px; border-radius:8px; border:none;
+    background:white; font-family:'Work Sans',sans-serif; font-size:14px;
+    cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.12); min-width:120px;
+  }
+  .btn-locate, .btn-search {
+    padding:13px 20px; border-radius:8px; border:none; cursor:pointer;
+    font-weight:600; font-size:14px; font-family:'Work Sans',sans-serif;
+    transition:all .2s; white-space:nowrap;
+  }
+  .btn-locate { background:var(--navy); color:white; }
+  .btn-locate:hover { background:#1d93a3; }
+  .btn-search { background:var(--mint); color:var(--navy); }
+  .btn-search:hover { background:#00c2a3; }
+
+  /* Stats banner */
+  .stats-banner {
+    background:var(--cyan); padding:18px 24px;
+    display:flex; justify-content:center; gap:60px; flex-wrap:wrap;
+  }
+  .stat { text-align:center; color:white; }
+  .stat-num {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:32px;
+    display:block; line-height:1;
+  }
+  .stat-label { font-size:12px; opacity:.85; letter-spacing:.5px; text-transform:uppercase; }
+
+  /* Info section */
+  .info-section {
+    background:var(--mint); padding:20px 24px;
+    text-align:center; color:var(--navy);
+  }
+  .info-section h2 { font-family:'Quicksand',sans-serif; font-weight:700; font-size:18px; }
+  .info-section p { font-size:13px; margin-top:4px; opacity:.8; }
+
+  /* Shop grid */
+  .shops-section { max-width:1100px; margin:0 auto; padding:40px 24px; }
+  .shops-section h3 {
+    font-family:'Quicksand',sans-serif; font-weight:700;
+    font-size:22px; color:var(--navy); margin-bottom:24px;
+    border-left:4px solid var(--mint); padding-left:14px;
+  }
+  .shops-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+  .shop-card {
+    background:white; border-radius:12px; padding:20px;
+    box-shadow:0 2px 12px rgba(4,69,92,.08);
+    border:1px solid var(--border); transition:all .25s;
+    cursor:pointer;
+  }
+  .shop-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(4,69,92,.14); }
+  .shop-card-header { display:flex; align-items:flex-start; justify-content:space-between; }
+  .shop-name { font-family:'Quicksand',sans-serif; font-weight:700; font-size:16px; color:var(--navy); }
+  .shop-distance { font-size:12px; color:var(--teal); font-weight:600; }
+  .shop-address { font-size:13px; color:var(--muted); margin-top:6px; }
+  .shop-desc { font-size:13px; color:var(--text); margin-top:10px; line-height:1.5; }
+  .shop-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .tag {
+    font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;
+    background:rgba(0,216,181,.12); color:var(--teal); border:1px solid rgba(0,216,181,.3);
+    text-transform:uppercase; letter-spacing:.3px;
+  }
+  .shop-footer { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+  .shop-link {
+    font-size:12px; color:var(--orange); font-weight:600;
+    text-decoration:none; transition:color .2s;
+  }
+  .shop-link:hover { color:var(--teal); }
+  .btn-map {
+    font-size:12px; color:var(--teal); font-weight:600; background:none;
+    border:1px solid var(--border); padding:5px 12px; border-radius:6px;
+    cursor:pointer; transition:all .2s;
+  }
+  .btn-map:hover { background:var(--mint); color:var(--navy); border-color:var(--mint); }
+
+  /* Popup */
+  .leaflet-popup-content-wrapper { border-radius:10px !important; box-shadow:0 4px 20px rgba(0,0,0,.2) !important; }
+  .popup-inner { font-family:'Work Sans',sans-serif; }
+  .popup-name { font-family:'Quicksand',sans-serif; font-weight:700; font-size:15px; color:var(--navy); }
+  .popup-addr { font-size:12px; color:var(--muted); margin-top:4px; }
+  .popup-desc { font-size:12px; margin-top:8px; line-height:1.4; }
+  .popup-link { display:inline-block; margin-top:8px; font-size:12px; font-weight:600; color:var(--orange); }
+
+  /* Site footer */
+  .site-footer {
+    background:var(--navy); color:rgba(255,255,255,.6);
+    text-align:center; padding:24px; font-size:12px; margin-top:40px;
+  }
+  .site-footer a { color:rgba(255,255,255,.7); text-decoration:none; margin:0 10px; }
+  .site-footer a:hover { color:var(--mint); }
+
+  /* ══════════════════════════════════════════════════
+     PANEL 2: ARCHITECTURE
+  ══════════════════════════════════════════════════ */
+  .arch-panel { padding:40px 32px; max-width:1200px; margin:0 auto; }
+  .arch-title {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:28px;
+    color:var(--navy); margin-bottom:8px;
+  }
+  .arch-subtitle { color:var(--muted); font-size:15px; margin-bottom:40px; }
+  
+  .arch-diagram {
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:0; margin-bottom:48px;
+    border:2px solid var(--border); border-radius:16px; overflow:hidden;
+  }
+  .arch-layer {
+    padding:28px 24px;
+    border-right:2px solid var(--border);
+  }
+  .arch-layer:last-child { border-right:none; }
+  .arch-layer-title {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:1.5px; text-transform:uppercase; margin-bottom:20px;
+    padding-bottom:12px; border-bottom:2px solid currentColor;
+  }
+  .layer-client .arch-layer-title { color:var(--orange); border-bottom-color:var(--orange); background:rgba(255,118,70,.05); }
+  .layer-client { background:rgba(255,118,70,.03); }
+  .layer-api .arch-layer-title { color:var(--teal); border-bottom-color:var(--teal); }
+  .layer-api { background:rgba(29,147,163,.03); }
+  .layer-db .arch-layer-title { color:var(--navy); border-bottom-color:var(--navy); }
+  .layer-db { background:rgba(4,69,92,.03); }
+
+  .arch-box {
+    background:white; border-radius:10px; padding:14px;
+    margin-bottom:12px; border:1px solid var(--border);
+    box-shadow:0 1px 4px rgba(4,69,92,.06);
+  }
+  .arch-box-title { font-weight:600; font-size:14px; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .arch-box-icon { font-size:18px; }
+  .arch-box-desc { font-size:12px; color:var(--muted); margin-top:5px; line-height:1.4; }
+  .arch-box-tech {
+    display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;
+  }
+  .tech-pill {
+    font-size:10px; font-weight:600; padding:2px 7px; border-radius:12px;
+    background:var(--light); color:var(--navy); border:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .arch-arrows {
+    display:flex; justify-content:center; align-items:center;
+    gap:20px; margin-bottom:40px; flex-wrap:wrap;
+  }
+  .arrow-group { text-align:center; }
+  .arrow-label { font-size:12px; color:var(--muted); font-weight:500; margin-bottom:6px; }
+  .arrow-line {
+    display:flex; align-items:center; gap:6px; justify-content:center;
+  }
+  .arrow-method {
+    background:var(--navy); color:white; font-family:'JetBrains Mono',monospace;
+    font-size:11px; padding:4px 10px; border-radius:6px; font-weight:500;
+  }
+  .arrow-dir { color:var(--mint); font-size:18px; }
+
+  /* DB Schema */
+  .schema-section h3 {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:18px;
+    color:var(--navy); margin-bottom:16px;
+  }
+  .schema-table {
+    width:100%; border-collapse:collapse; margin-bottom:32px;
+    border-radius:10px; overflow:hidden; box-shadow:0 2px 12px rgba(4,69,92,.08);
+  }
+  .schema-table th {
+    background:var(--navy); color:white; padding:12px 16px;
+    font-family:'JetBrains Mono',monospace; font-size:12px;
+    text-align:left; font-weight:500;
+  }
+  .schema-table td {
+    padding:11px 16px; font-size:13px; border-bottom:1px solid var(--border);
+    background:white;
+  }
+  .schema-table tr:last-child td { border-bottom:none; }
+  .col-name { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--teal); }
+  .col-type { font-family:'JetBrains Mono',monospace; color:var(--orange); font-size:12px; }
+  .col-note { color:var(--muted); font-size:12px; }
+  .pk-badge {
+    display:inline-block; background:var(--amber); color:var(--navy);
+    font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px;
+    margin-left:6px; vertical-align:middle;
+  }
+
+  /* Bonus section */
+  .bonus-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px; margin-top:24px; }
+  .bonus-card {
+    background:white; border-radius:12px; padding:24px;
+    border:1px solid var(--border); box-shadow:0 2px 10px rgba(4,69,92,.07);
+  }
+  .bonus-card h4 {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:15px;
+    color:var(--navy); margin-bottom:12px; display:flex; align-items:center; gap:8px;
+  }
+  .bonus-card ul { list-style:none; }
+  .bonus-card ul li {
+    font-size:13px; color:var(--text); padding:6px 0;
+    border-bottom:1px solid var(--border); display:flex; align-items:flex-start; gap:8px;
+  }
+  .bonus-card ul li:last-child { border-bottom:none; }
+  .bonus-card ul li::before { content:'→'; color:var(--mint); font-weight:700; flex-shrink:0; }
+
+  /* ══════════════════════════════════════════════════
+     PANEL 3: CODE
+  ══════════════════════════════════════════════════ */
+  .code-panel { display:flex; height:calc(100vh - 49px); }
+  .code-sidebar {
+    width:220px; flex-shrink:0; background:var(--navy);
+    padding:20px 0; overflow-y:auto;
+  }
+  .code-sidebar h4 {
+    font-size:10px; font-weight:700; letter-spacing:1.5px;
+    text-transform:uppercase; color:rgba(255,255,255,.35);
+    padding:10px 18px 6px; margin-top:10px;
+  }
+  .code-sidebar h4:first-child { margin-top:0; }
+  .code-file-btn {
+    display:flex; align-items:center; gap:8px; width:100%;
+    padding:9px 18px; font-size:13px; font-family:'JetBrains Mono',monospace;
+    color:rgba(255,255,255,.65); background:none; border:none; cursor:pointer;
+    text-align:left; transition:all .15s;
+  }
+  .code-file-btn:hover { background:rgba(255,255,255,.07); color:white; }
+  .code-file-btn.active { background:rgba(0,216,181,.15); color:var(--mint); }
+  .code-file-icon { font-size:14px; }
+  .code-main { flex:1; overflow:auto; }
+  .code-header {
+    background:#0d1f27; padding:14px 24px; border-bottom:1px solid rgba(255,255,255,.08);
+    display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:10;
+  }
+  .code-filepath {
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:rgba(255,255,255,.7);
+  }
+  .code-lang-badge {
+    font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700;
+    padding:2px 8px; border-radius:5px; background:rgba(0,216,181,.2); color:var(--mint);
+  }
+  .code-copy-btn {
+    margin-left:auto; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+    color:rgba(255,255,255,.6); font-size:12px; padding:5px 12px; border-radius:6px;
+    cursor:pointer; font-family:'Work Sans',sans-serif; transition:all .2s;
+  }
+  .code-copy-btn:hover { background:rgba(255,255,255,.15); color:white; }
+  .code-content {
+    background:#0d1f27; min-height:calc(100% - 49px);
+    padding:24px; overflow-x:auto;
+  }
+  pre {
+    font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7;
+    color:#e2f4f7; margin:0; white-space:pre-wrap; word-break:break-word;
+  }
+  /* Syntax colouring */
+  .k { color:#00d8b5; } /* keywords */
+  .s { color:#ffbb53; } /* strings */
+  .c { color:#4d7a89; font-style:italic; } /* comments */
+  .f { color:#ff7646; } /* function names */
+  .n { color:#a8d8e8; } /* variable names */
+  .p { color:#e2f4f7; } /* punctuation */
+  .num { color:#ff9d72; } /* numbers */
+  .type { color:#00c1ef; } /* types */
+
+  /* ══════════════════════════════════════════════════
+     PANEL 4: INSTRUCTIONS
+  ══════════════════════════════════════════════════ */
+  .instructions-panel { max-width:900px; margin:0 auto; padding:40px 32px; }
+  .inst-title {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:28px;
+    color:var(--navy); margin-bottom:8px;
+  }
+  .inst-subtitle { color:var(--muted); margin-bottom:40px; }
+  .inst-step {
+    display:flex; gap:20px; margin-bottom:32px; align-items:flex-start;
+  }
+  .inst-num {
+    width:40px; height:40px; border-radius:50%; background:var(--navy);
+    color:white; font-family:'Quicksand',sans-serif; font-weight:700; font-size:18px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .inst-body h4 {
+    font-family:'Quicksand',sans-serif; font-weight:700; font-size:16px;
+    color:var(--navy); margin-bottom:8px;
+  }
+  .inst-body p { font-size:14px; color:var(--text); line-height:1.6; margin-bottom:10px; }
+  .code-block {
+    background:var(--navy); border-radius:8px; padding:14px 18px;
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:#a8d8e8;
+    line-height:1.7; overflow-x:auto; margin-top:8px;
+  }
+  .code-block .cm { color:#4d7a89; font-style:italic; }
+  .code-block .ck { color:var(--mint); }
+  .code-block .cs { color:var(--amber); }
+
+  .checklist { list-style:none; margin-top:16px; }
+  .checklist li {
+    font-size:14px; color:var(--text); padding:8px 0;
+    border-bottom:1px solid var(--border); display:flex; gap:10px; align-items:center;
+  }
+  .checklist li::before { content:'✓'; color:var(--mint); font-weight:700; }
+  .checklist li:last-child { border-bottom:none; }
+
+  .env-table { width:100%; border-collapse:collapse; margin-top:10px; border-radius:8px; overflow:hidden; }
+  .env-table th { background:var(--teal); color:white; padding:10px 14px; font-size:12px; text-align:left; }
+  .env-table td { padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); background:white; }
+  .env-table td:first-child { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--orange); }
+  .env-table tr:last-child td { border-bottom:none; }
+
+  @media(max-width:720px) {
+    .arch-diagram { grid-template-columns:1fr; }
+    .arch-layer { border-right:none; border-bottom:2px solid var(--border); }
+    .code-panel { flex-direction:column; }
+    .code-sidebar { width:100%; height:auto; display:flex; flex-wrap:wrap; padding:10px; }
+    .tab { padding:12px 14px; font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-logo">♻ Zero Waste <span>Near Me</span></div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="showPanel('preview',this)">🗺 Live Preview</button>
+    <button class="tab" onclick="showPanel('arch',this)">🏗 Architecture</button>
+    <button class="tab" onclick="showPanel('code',this)">💻 Code <span class="tab-badge">8 files</span></button>
+    <button class="tab" onclick="showPanel('instructions',this)">🚀 Run Locally</button>
+  </div>
+</nav>
+
+<!-- ═══ PANEL 1: LIVE PREVIEW ═══ -->
+<div id="panel-preview" class="panel active">
+  <div class="site-wrap">
+    <!-- Site header -->
+    <header class="site-header">
+      <div class="site-logo">♻ Zero Waste <em>Near Me</em></div>
+      <nav class="site-nav">
+        <a href="#">Directory</a>
+        <a href="#">Add Your Shop</a>
+        <a href="#">Contact</a>
+      </nav>
+    </header>
+
+    <!-- Leaflet Map -->
+    <div id="leaflet-map"></div>
+
+    <!-- Search bar -->
+    <div class="search-section">
+      <div class="search-inner">
+        <div class="search-title">Find Zero Waste Shops Near You</div>
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <input class="search-input" type="text" placeholder="Enter your postcode or town…" id="searchInput">
+          </div>
+          <select class="radius-select" id="radiusSelect">
+            <option>Within 5 miles</option>
+            <option>Within 10 miles</option>
+            <option>Within 25 miles</option>
+            <option>Anywhere in UK</option>
+          </select>
+          <button class="btn-locate" onclick="locateUser()">📍 Use My Location</button>
+          <button class="btn-search" onclick="doSearch()">Search →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-banner">
+      <div class="stat"><span class="stat-num" id="statShops">12</span><span class="stat-label">Shops Listed</span></div>
+      <div class="stat"><span class="stat-num">6</span><span class="stat-label">Cities Covered</span></div>
+      <div class="stat"><span class="stat-num">3</span><span class="stat-label">Categories</span></div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-section">
+      <h2>UK's directory of zero waste &amp; refill shops</h2>
+      <p>Find your nearest shop, reduce your packaging footprint, and join the zero waste movement.</p>
+    </div>
+
+    <!-- Shop Grid -->
+    <div class="shops-section">
+      <h3 id="shopsHeading">Nearby Shops</h3>
+      <div class="shops-grid" id="shopsGrid"></div>
+    </div>
+
+    <footer class="site-footer">
+      <div style="margin-bottom:10px">
+        <a href="#">Zero Waste Directory</a>
+        <a href="#">Add Your Business</a>
+        <a href="#">Add Local Shops</a>
+        <a href="#">Contact Us</a>
+      </div>
+      <p>© 2025 Zero Waste Near Me. All rights reserved.</p>
+    </footer>
+  </div>
+</div>
+
+<!-- ═══ PANEL 2: ARCHITECTURE ═══ -->
+<div id="panel-arch" class="panel">
+  <div class="arch-panel">
+    <h2 class="arch-title">System Architecture</h2>
+    <p class="arch-subtitle">Modern rebuild: Next.js frontend · Express REST API · PostgreSQL with PostGIS · Leaflet maps</p>
+
+    <!-- Three-layer diagram -->
+    <div class="arch-diagram">
+      <div class="arch-layer layer-client">
+        <div class="arch-layer-title">Frontend (Client)</div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🗺</span>Homepage</div>
+          <div class="arch-box-desc">Map + search hero. Full-width Leaflet map with auto-clustered pins.</div>
+          <div class="arch-box-tech"><span class="tech-pill">Next.js</span><span class="tech-pill">Leaflet</span><span class="tech-pill">Tailwind</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🔍</span>Search Page</div>
+          <div class="arch-box-desc">Postcode/town search with distance filter. Results in split map + list view.</div>
+          <div class="arch-box-tech"><span class="tech-pill">React Query</span><span class="tech-pill">Postcode.io</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🏪</span>Shop Detail</div>
+          <div class="arch-box-desc">Individual shop page with map, description, tags, and submit-edit link.</div>
+          <div class="arch-box-tech"><span class="tech-pill">ISR</span><span class="tech-pill">OG tags</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">📝</span>Submit Form</div>
+          <div class="arch-box-desc">Crowdsource new shops. Geocodes address on submit, stored as pending.</div>
+          <div class="arch-box-tech"><span class="tech-pill">React Hook Form</span><span class="tech-pill">Zod</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🔒</span>Admin Panel</div>
+          <div class="arch-box-desc">Moderate pending submissions, bulk CSV import, approve/reject.</div>
+          <div class="arch-box-tech"><span class="tech-pill">NextAuth</span><span class="tech-pill">Papa Parse</span></div>
+        </div>
+      </div>
+
+      <div class="arch-layer layer-api">
+        <div class="arch-layer-title">API Layer (Server)</div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">⚡</span>Express Server</div>
+          <div class="arch-box-desc">RESTful API. Versioned routes. Helmet + rate-limiting for security.</div>
+          <div class="arch-box-tech"><span class="tech-pill">Node.js</span><span class="tech-pill">Express 5</span><span class="tech-pill">Helmet</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">📍</span>GET /shops/nearby</div>
+          <div class="arch-box-desc">ST_DWithin geospatial query. Returns shops within radius (lat/lng + km).</div>
+          <div class="arch-box-tech"><span class="tech-pill">PostGIS</span><span class="tech-pill">Haversine</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🗂</span>GET /shops</div>
+          <div class="arch-box-desc">Full directory with pagination, tag filters, search query.</div>
+          <div class="arch-box-tech"><span class="tech-pill">cursor pagination</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">📬</span>POST /shops/submit</div>
+          <div class="arch-box-desc">Public submission endpoint. Geocodes via Postcodes.io, stores as pending.</div>
+          <div class="arch-box-tech"><span class="tech-pill">Postcodes.io</span><span class="tech-pill">Joi</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">📥</span>POST /admin/import</div>
+          <div class="arch-box-desc">Bulk CSV import with geocoding, dedup check, batch insert.</div>
+          <div class="arch-box-tech"><span class="tech-pill">csv-parse</span><span class="tech-pill">pg COPY</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">✅</span>PATCH /admin/approve</div>
+          <div class="arch-box-desc">Approve / reject pending shops. Sends confirmation email.</div>
+          <div class="arch-box-tech"><span class="tech-pill">Resend</span><span class="tech-pill">JWT</span></div>
+        </div>
+      </div>
+
+      <div class="arch-layer layer-db">
+        <div class="arch-layer-title">Data Layer</div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🐘</span>PostgreSQL + PostGIS</div>
+          <div class="arch-box-desc">Primary store. PostGIS extension enables fast geospatial queries.</div>
+          <div class="arch-box-tech"><span class="tech-pill">PostgreSQL 16</span><span class="tech-pill">PostGIS</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">📊</span>shops table</div>
+          <div class="arch-box-desc">Core directory data with GEOGRAPHY column for efficient radius search.</div>
+          <div class="arch-box-tech"><span class="tech-pill">GEOGRAPHY(POINT)</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">⏳</span>pending_submissions</div>
+          <div class="arch-box-desc">Crowdsourced submissions awaiting moderation before going live.</div>
+          <div class="arch-box-tech"><span class="tech-pill">status enum</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🔁</span>Caching</div>
+          <div class="arch-box-desc">Redis for geospatial query caching (5 min TTL). CDN edge cache for shop pages.</div>
+          <div class="arch-box-tech"><span class="tech-pill">Redis</span><span class="tech-pill">Vercel Edge</span></div>
+        </div>
+        <div class="arch-box">
+          <div class="arch-box-title"><span class="arch-box-icon">🗂</span>Search Index</div>
+          <div class="arch-box-desc">GIN index on tsvector for full-text shop name/description search.</div>
+          <div class="arch-box-tech"><span class="tech-pill">GIN index</span><span class="tech-pill">tsvector</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API flow -->
+    <h3 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin-bottom:20px">API Endpoints</h3>
+    <div class="arch-arrows">
+      <div class="arrow-group"><div class="arrow-label">Find nearby shops</div><div class="arrow-line"><span class="arrow-method">GET /api/shops/nearby?lat=51.5&lng=-0.1&radius=10</span></div></div>
+      <div class="arrow-group"><div class="arrow-label">Full directory</div><div class="arrow-line"><span class="arrow-method">GET /api/shops?tag=food&page=1</span></div></div>
+      <div class="arrow-group"><div class="arrow-label">Single shop</div><div class="arrow-line"><span class="arrow-method">GET /api/shops/:id</span></div></div>
+      <div class="arrow-group"><div class="arrow-label">Submit new shop</div><div class="arrow-line"><span class="arrow-method">POST /api/shops/submit</span></div></div>
+      <div class="arrow-group"><div class="arrow-label">Bulk CSV import</div><div class="arrow-line"><span class="arrow-method">POST /api/admin/import</span></div></div>
+      <div class="arrow-group"><div class="arrow-label">Moderation</div><div class="arrow-line"><span class="arrow-method">PATCH /api/admin/shops/:id</span></div></div>
+    </div>
+
+    <!-- DB Schema -->
+    <div class="schema-section">
+      <h3>Database Schema</h3>
+      <table class="schema-table">
+        <thead>
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="col-name">id</span><span class="pk-badge">PK</span></td><td><span class="col-type">UUID</span></td><td class="col-note">gen_random_uuid() default</td></tr>
+          <tr><td><span class="col-name">name</span></td><td><span class="col-type">TEXT NOT NULL</span></td><td class="col-note">Shop display name</td></tr>
+          <tr><td><span class="col-name">address</span></td><td><span class="col-type">TEXT</span></td><td class="col-note">Full street address</td></tr>
+          <tr><td><span class="col-name">postcode</span></td><td><span class="col-type">VARCHAR(10)</span></td><td class="col-note">Indexed for lookup</td></tr>
+          <tr><td><span class="col-name">latitude</span></td><td><span class="col-type">FLOAT8</span></td><td class="col-note">WGS84 decimal degrees</td></tr>
+          <tr><td><span class="col-name">longitude</span></td><td><span class="col-type">FLOAT8</span></td><td class="col-note">WGS84 decimal degrees</td></tr>
+          <tr><td><span class="col-name">location</span></td><td><span class="col-type">GEOGRAPHY(POINT)</span></td><td class="col-note">PostGIS column — generated from lat/lng</td></tr>
+          <tr><td><span class="col-name">website</span></td><td><span class="col-type">TEXT</span></td><td class="col-note">Nullable — not all shops have sites</td></tr>
+          <tr><td><span class="col-name">description</span></td><td><span class="col-type">TEXT</span></td><td class="col-note">Full-text indexed (tsvector)</td></tr>
+          <tr><td><span class="col-name">tags</span></td><td><span class="col-type">TEXT[]</span></td><td class="col-note">e.g. ['food refill', 'household']</td></tr>
+          <tr><td><span class="col-name">status</span></td><td><span class="col-type">ENUM</span></td><td class="col-note">'active' | 'pending' | 'rejected'</td></tr>
+          <tr><td><span class="col-name">submitted_by</span></td><td><span class="col-type">TEXT</span></td><td class="col-note">Email of submitter (optional)</td></tr>
+          <tr><td><span class="col-name">created_at</span></td><td><span class="col-type">TIMESTAMPTZ</span></td><td class="col-note">now() default</td></tr>
+          <tr><td><span class="col-name">updated_at</span></td><td><span class="col-type">TIMESTAMPTZ</span></td><td class="col-note">Trigger-maintained</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bonus -->
+    <h3 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin-bottom:4px">Bonus Features</h3>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:0">CSV import · Crowdsourcing · Moderation workflow</p>
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <h4>📥 CSV Bulk Import</h4>
+        <ul>
+          <li>Parse CSV with <code>csv-parse</code> streaming to handle large files</li>
+          <li>Geocode each postcode via Postcodes.io free API (batch up to 100)</li>
+          <li>Deduplication check on (name + postcode) before insert</li>
+          <li>Use <code>COPY FROM STDIN</code> for 10× faster bulk inserts</li>
+          <li>Return import report: inserted / skipped / errors</li>
+        </ul>
+      </div>
+      <div class="bonus-card">
+        <h4>🤝 Crowdsource Submissions</h4>
+        <ul>
+          <li>Public form — name, address, postcode, website, description, tags</li>
+          <li>Geocode postcode on submit, store location point</li>
+          <li>Set <code>status = 'pending'</code> — never shown publicly until approved</li>
+          <li>Email submitter with tracking link (Resend/SendGrid)</li>
+          <li>Rate limit: 3 submissions per IP per day</li>
+        </ul>
+      </div>
+      <div class="bonus-card">
+        <h4>🛡 Moderation Panel</h4>
+        <ul>
+          <li>Protected admin route via NextAuth (GitHub/Google OAuth)</li>
+          <li>Queue of pending shops with map preview</li>
+          <li>One-click approve → status becomes 'active', revalidates ISR page</li>
+          <li>Reject with reason → email sent to submitter</li>
+          <li>Bulk-approve filtered by date / region</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 3: CODE ═══ -->
+<div id="panel-code" class="panel">
+  <div class="code-panel">
+    <div class="code-sidebar">
+      <h4>Backend</h4>
+      <button class="code-file-btn active" onclick="showFile('schema')"><span class="code-file-icon">🗄</span>schema.sql</button>
+      <button class="code-file-btn" onclick="showFile('server')"><span class="code-file-icon">⚡</span>server.js</button>
+      <button class="code-file-btn" onclick="showFile('routes')"><span class="code-file-icon">🛤</span>shops.routes.js</button>
+      <button class="code-file-btn" onclick="showFile('seed')"><span class="code-file-icon">🌱</span>seed.json</button>
+      <h4>Frontend</h4>
+      <button class="code-file-btn" onclick="showFile('page')"><span class="code-file-icon">🏠</span>page.jsx</button>
+      <button class="code-file-btn" onclick="showFile('map')"><span class="code-file-icon">🗺</span>MapView.jsx</button>
+      <button class="code-file-btn" onclick="showFile('shopcard')"><span class="code-file-icon">🏪</span>ShopCard.jsx</button>
+      <h4>Config</h4>
+      <button class="code-file-btn" onclick="showFile('env')"><span class="code-file-icon">⚙️</span>.env.example</button>
+    </div>
+    <div class="code-main" id="codeMain">
+      <div class="code-header">
+        <span class="code-filepath" id="codeFilepath">db/schema.sql</span>
+        <span class="code-lang-badge" id="codeLang">SQL</span>
+        <button class="code-copy-btn" onclick="copyCode()">Copy</button>
+      </div>
+      <div class="code-content">
+        <pre id="codeBlock"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 4: INSTRUCTIONS ═══ -->
+<div id="panel-instructions" class="panel">
+  <div class="instructions-panel">
+    <h2 class="inst-title">Run Locally</h2>
+    <p class="inst-subtitle">Get the full stack running in ~10 minutes.</p>
+
+    <div class="inst-step">
+      <div class="inst-num">1</div>
+      <div class="inst-body">
+        <h4>Prerequisites</h4>
+        <ul class="checklist">
+          <li>Node.js 20+ installed</li>
+          <li>PostgreSQL 15+ with PostGIS extension</li>
+          <li>Git installed</li>
+          <li>(Optional) Redis for caching</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="inst-step">
+      <div class="inst-num">2</div>
+      <div class="inst-body">
+        <h4>Clone &amp; Install</h4>
+        <div class="code-block">
+<span class="ck">git</span> clone https://github.com/your-org/zero-waste-near-me<br>
+<span class="ck">cd</span> zero-waste-near-me<br><br>
+<span class="cm"># Install backend deps</span><br>
+<span class="ck">cd</span> backend && <span class="ck">npm</span> install<br><br>
+<span class="cm"># Install frontend deps</span><br>
+<span class="ck">cd</span> ../frontend && <span class="ck">npm</span> install
+        </div>
+      </div>
+    </div>
+
+    <div class="inst-step">
+      <div class="inst-num">3</div>
+      <div class="inst-body">
+        <h4>Set Up Environment Variables</h4>
+        <p>Copy <code>.env.example</code> to <code>.env</code> in both <code>/backend</code> and <code>/frontend</code>:</p>
+        <table class="env-table">
+          <thead><tr><th>Variable</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>DATABASE_URL</td><td>PostgreSQL connection string</td></tr>
+            <tr><td>REDIS_URL</td><td>Redis URL (optional)</td></tr>
+            <tr><td>NEXT_PUBLIC_API_URL</td><td>Backend API base URL</td></tr>
+            <tr><td>NEXTAUTH_SECRET</td><td>Random string for session signing</td></tr>
+            <tr><td>ADMIN_GITHUB_ID</td><td>GitHub OAuth App client ID</td></tr>
+            <tr><td>ADMIN_GITHUB_SECRET</td><td>GitHub OAuth App client secret</td></tr>
+            <tr><td>RESEND_API_KEY</td><td>Email API key (optional)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="inst-step">
+      <div class="inst-num">4</div>
+      <div class="inst-body">
+        <h4>Create the Database</h4>
+        <div class="code-block">
+<span class="cm"># Create database and enable PostGIS</span><br>
+<span class="ck">createdb</span> zerowaste<br>
+<span class="ck">psql</span> -d zerowaste -c <span class="cs">"CREATE EXTENSION postgis;"</span><br><br>
+<span class="cm"># Run the schema</span><br>
+<span class="ck">psql</span> -d zerowaste -f backend/db/schema.sql<br><br>
+<span class="cm"># Seed with example shops</span><br>
+<span class="ck">node</span> backend/db/seed.js
+        </div>
+      </div>
+    </div>
+
+    <div class="inst-step">
+      <div class="inst-num">5</div>
+      <div class="inst-body">
+        <h4>Start Dev Servers</h4>
+        <div class="code-block">
+<span class="cm"># Terminal 1 — Backend (port 3001)</span><br>
+<span class="ck">cd</span> backend && <span class="ck">npm</span> run dev<br><br>
+<span class="cm"># Terminal 2 — Frontend (port 3000)</span><br>
+<span class="ck">cd</span> frontend && <span class="ck">npm</span> run dev
+        </div>
+        <p style="margin-top:12px">Open <strong>http://localhost:3000</strong> — you should see the homepage with the map and sample shops!</p>
+      </div>
+    </div>
+
+    <div class="inst-step">
+      <div class="inst-num">6</div>
+      <div class="inst-body">
+        <h4>Import a CSV of Shops</h4>
+        <p>CSV format: <code>name, address, postcode, website, description, tags</code></p>
+        <div class="code-block">
+<span class="ck">curl</span> -X POST http://localhost:3001/api/admin/import \<br>
+  -H <span class="cs">"Authorization: Bearer $ADMIN_TOKEN"</span> \<br>
+  -F <span class="cs">"file=@shops.csv"</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="inst-step">
+      <div class="inst-num">7</div>
+      <div class="inst-body">
+        <h4>Deploy to Production</h4>
+        <ul class="checklist">
+          <li>Frontend → Vercel (zero config, ISR built in)</li>
+          <li>Backend → Railway or Render (free tier available)</li>
+          <li>Database → Supabase or Railway PostgreSQL with PostGIS</li>
+          <li>Add custom domain + SSL (automatic on Vercel)</li>
+          <li>Set all env vars in Vercel dashboard</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Tab switching ─────────────────────────── */
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'preview') initMap();
+  if (id === 'code') showFile('schema');
+}
+
+/* ── Shop data ─────────────────────────────── */
+const shops = [
+  { id:1, name:"The Refill Pantry", address:"14 Brick Lane, London E1 6RF", postcode:"E1 6RF", lat:51.5213, lng:-0.0714, website:"therefillpantry.co.uk", description:"London's original zero-waste grocery. Bring your own containers for pasta, grains, oils and cleaning products.", tags:["food refill","household refill","loose produce"], dist:"0.8" },
+  { id:2, name:"Edinburgh Eco Store", address:"22 Grassmarket, Edinburgh EH1 2JU", postcode:"EH1 2JU", lat:55.9477, lng:-3.1921, website:"edinburghecostore.com", description:"Scotland's favourite zero-waste shop. Over 300 products from locally-sourced grains to refillable cosmetics.", tags:["food refill","cosmetics","loose herbs"], dist:"1.2" },
+  { id:3, name:"Manchester Bulk & Brew", address:"7 Northern Quarter, Manchester M4 1HB", postcode:"M4 1HB", lat:53.4843, lng:-2.2326, website:"bulkandbrew.co.uk", description:"Organic bulk dry goods, coffee, and a zero-waste café. Compostable takeaway cups.", tags:["food refill","café","organic"], dist:"2.1" },
+  { id:4, name:"Bristol Zero Waste Hub", address:"45 Stokes Croft, Bristol BS1 3QP", postcode:"BS1 3QP", lat:51.4645, lng:-2.5897, website:"bristolzerowaste.org", description:"Community-owned refill shop. All profits go to local environmental projects.", tags:["household refill","food refill","community"], dist:"3.0" },
+  { id:5, name:"Leeds Naked Pantry", address:"9 Thornton's Arcade, Leeds LS1 6HX", postcode:"LS1 6HX", lat:53.7989, lng:-1.5424, website:"nakedpantry.co.uk", description:"Beautifully designed zero-waste concept store. Refill everything from tahini to washing-up liquid.", tags:["food refill","homeware","loose spices"], dist:"3.4" },
+  { id:6, name:"Brighton Packaging Free", address:"33 Trafalgar Street, Brighton BN1 4ED", postcode:"BN1 4ED", lat:50.8281, lng:-0.1403, website:"brightonpackagingfree.com", description:"Sea-side zero-waste pioneer. Focus on plastic-free household and beauty products.", tags:["household refill","beauty","plastic-free"], dist:"4.1" },
+  { id:7, name:"Cardiff Refill Co.", address:"17 Morgan Arcade, Cardiff CF10 1AF", postcode:"CF10 1AF", lat:51.4816, lng:-3.1791, website:"cardiffrefill.co.uk", description:"Wales' first dedicated refill shop. Stocking over 200 loose products from UK suppliers.", tags:["food refill","household refill"], dist:"4.8" },
+  { id:8, name:"Glasgow Green Living", address:"81 Byres Road, Glasgow G11 5HW", postcode:"G11 5HW", lat:55.8717, lng:-4.2970, website:"glasgowgreenliving.co.uk", description:"Refill shop and sustainability workshop space. Weekly drop-in sessions on zero waste living.", tags:["food refill","workshops","community"], dist:"5.3" },
+  { id:9, name:"Oxford Scoop & Weigh", address:"4 Covered Market, Oxford OX1 3DU", postcode:"OX1 3DU", lat:51.7520, lng:-1.2578, website:"scoopandweigh.co.uk", description:"Nestled in Oxford's historic covered market. Organic pulses, grains, and artisan condiments.", tags:["food refill","organic","loose produce"], dist:"6.1" },
+  { id:10, name:"Nottingham Eco Emporium", address:"25 Pelham Street, Nottingham NG1 2EG", postcode:"NG1 2EG", lat:52.9548, lng:-1.1440, website:"ecoemporium.co.uk", description:"Three floors of sustainable living products. Ground floor fully dedicated to refill stations.", tags:["household refill","food refill","homeware","beauty"], dist:"7.2" },
+  { id:11, name:"Liverpool Refill Bar", address:"6 Bold Street, Liverpool L1 4DS", postcode:"L1 4DS", lat:53.4052, lng:-2.9803, website:"liverpoolrefillbar.com", description:"Vibrant refill bar concept with pop-up events. Specialising in natural cleaning and personal care.", tags:["household refill","beauty","events"], dist:"8.0" },
+  { id:12, name:"Newcastle Loose & Local", address:"Grainger Market, Newcastle NE1 5QQ", postcode:"NE1 5QQ", lat:54.9716, lng:-1.6119, website:"looseandlocal.co.uk", description:"Inside the historic Grainger Market. Local producers supply most of the loose food products.", tags:["food refill","local produce","loose herbs"], dist:"9.3" }
+];
+
+/* ── Map init ──────────────────────────────── */
+let map, mapReady = false;
+function initMap() {
+  if (mapReady) return;
+  mapReady = true;
+  map = L.map('leaflet-map').setView([53.0, -1.5], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap contributors', maxZoom:18
+  }).addTo(map);
+
+  const greenIcon = L.divIcon({
+    className:'', iconSize:[28,28], iconAnchor:[14,28], popupAnchor:[0,-30],
+    html:`<svg viewBox="0 0 28 36" width="28" height="36" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="#00d8b5"/>
+      <circle cx="14" cy="14" r="6" fill="white"/>
+    </svg>`
+  });
+
+  shops.forEach(s => {
+    const marker = L.marker([s.lat, s.lng], {icon: greenIcon}).addTo(map);
+    marker.bindPopup(`
+      <div class="popup-inner">
+        <div class="popup-name">${s.name}</div>
+        <div class="popup-addr">📍 ${s.address}</div>
+        <div class="popup-desc">${s.description.substring(0,100)}…</div>
+        <a class="popup-link" href="https://${s.website}" target="_blank">Visit website →</a>
+      </div>
+    `, {maxWidth:260});
+  });
+}
+
+/* ── Render shop cards ─────────────────────── */
+function renderShops(list) {
+  const grid = document.getElementById('shopsGrid');
+  grid.innerHTML = list.map(s => `
+    <div class="shop-card" onclick="flyToShop(${s.lat},${s.lng})">
+      <div class="shop-card-header">
+        <div class="shop-name">${s.name}</div>
+        <div class="shop-distance">${s.dist} mi</div>
+      </div>
+      <div class="shop-address">📍 ${s.address}</div>
+      <div class="shop-desc">${s.description}</div>
+      <div class="shop-tags">${s.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="shop-footer">
+        <a class="shop-link" href="https://${s.website}" target="_blank">🌐 ${s.website}</a>
+        <button class="btn-map" onclick="event.stopPropagation();flyToShop(${s.lat},${s.lng})">📍 Map</button>
+      </div>
+    </div>`).join('');
+}
+
+function flyToShop(lat, lng) {
+  if (map) { map.flyTo([lat, lng], 15, {duration:1.2}); }
+  document.getElementById('leaflet-map').scrollIntoView({behavior:'smooth'});
+}
+
+function locateUser() {
+  if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const {latitude:lat, longitude:lng} = pos.coords;
+    if (map) map.flyTo([lat, lng], 12);
+    document.getElementById('shopsHeading').textContent = 'Shops Near Your Location';
+    renderShops(shops);
+  }, () => alert('Could not get your location.'));
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const filtered = q ? shops.filter(s =>
+    s.name.toLowerCase().includes(q) ||
+    s.address.toLowerCase().includes(q) ||
+    s.postcode.toLowerCase().includes(q) ||
+    s.tags.some(t => t.includes(q))
+  ) : shops;
+  document.getElementById('shopsHeading').textContent = q
+    ? `Results for "${document.getElementById('searchInput').value}" (${filtered.length})`
+    : 'All Shops';
+  renderShops(filtered);
+}
+
+/* ── Code panel ─────────────────────────────── */
+const files = {
+  schema: { path:'db/schema.sql', lang:'SQL', code:
+`-- Enable PostGIS extension
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- Status enum
+CREATE TYPE shop_status AS ENUM ('active', 'pending', 'rejected');
+
+-- Main shops table
+CREATE TABLE shops (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name           TEXT NOT NULL,
+  address        TEXT,
+  postcode       VARCHAR(10),
+  latitude       FLOAT8,
+  longitude      FLOAT8,
+  location       GEOGRAPHY(POINT, 4326),
+  website        TEXT,
+  description    TEXT,
+  tags           TEXT[],
+  status         shop_status NOT NULL DEFAULT 'active',
+  submitted_by   TEXT,
+  search_vector  TSVECTOR GENERATED ALWAYS AS (
+    to_tsvector('english', coalesce(name,'') || ' ' || coalesce(description,''))
+  ) STORED,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Geospatial index for radius queries
+CREATE INDEX idx_shops_location ON shops USING GIST (location);
+
+-- Full-text search index
+CREATE INDEX idx_shops_fts ON shops USING GIN (search_vector);
+
+-- Postcode lookup index
+CREATE INDEX idx_shops_postcode ON shops (postcode);
+
+-- Status filter index
+CREATE INDEX idx_shops_status ON shops (status);
+
+-- Auto-generate location column from lat/lng
+CREATE OR REPLACE FUNCTION shops_set_location()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.latitude IS NOT NULL AND NEW.longitude IS NOT NULL THEN
+    NEW.location := ST_MakePoint(NEW.longitude, NEW.latitude)::GEOGRAPHY;
+  END IF;
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_shops_location
+  BEFORE INSERT OR UPDATE ON shops
+  FOR EACH ROW EXECUTE FUNCTION shops_set_location();
+
+-- Pending submissions table
+CREATE TABLE pending_submissions (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shop_data    JSONB NOT NULL,
+  submitter_email TEXT,
+  ip_address   INET,
+  status       shop_status NOT NULL DEFAULT 'pending',
+  notes        TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);` },
+
+  server: { path:'backend/server.js', lang:'JS', code:
+`import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import shopsRouter from './routes/shops.routes.js';
+import adminRouter from './routes/admin.routes.js';
+import { pool } from './db/pool.js';
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// ── Security middleware ─────────────────────
+app.use(helmet());
+app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(express.json({ limit: '10mb' }));
+
+// Rate limiting — 100 req/15min per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+});
+app.use('/api/', limiter);
+
+// ── Routes ──────────────────────────────────
+app.use('/api/shops',  shopsRouter);
+app.use('/api/admin',  adminRouter);
+
+// Health check
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ok', db: 'connected' });
+  } catch (e) {
+    res.status(503).json({ status: 'error', db: 'disconnected' });
+  }
+});
+
+// ── Global error handler ────────────────────
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal server error'
+  });
+});
+
+app.listen(PORT, () =>
+  console.log(\`Zero Waste API running on :$\{PORT\}\`)
+);` },
+
+  routes: { path:'backend/routes/shops.routes.js', lang:'JS', code:
+`import { Router } from 'express';
+import { pool } from '../db/pool.js';
+
+const router = Router();
+
+// GET /api/shops/nearby?lat=51.5&lng=-0.1&radius=10
+// Returns shops within radius km, ordered by distance
+router.get('/nearby', async (req, res, next) => {
+  try {
+    const { lat, lng, radius = 10 } = req.query;
+    if (!lat || !lng) return res.status(400).json({ error: 'lat and lng required' });
+
+    const { rows } = await pool.query(\`
+      SELECT
+        id, name, address, postcode, latitude, longitude,
+        website, description, tags,
+        ROUND(
+          ST_Distance(location, ST_MakePoint($2, $1)::GEOGRAPHY) / 1000
+        , 1) AS distance_km
+      FROM shops
+      WHERE status = 'active'
+        AND ST_DWithin(
+          location,
+          ST_MakePoint($2, $1)::GEOGRAPHY,
+          $3 * 1000
+        )
+      ORDER BY distance_km ASC
+      LIMIT 50
+    \`, [lat, lng, radius]);
+
+    res.json({ shops: rows, total: rows.length });
+  } catch (e) { next(e); }
+});
+
+// GET /api/shops?tag=food&q=bristol&page=1
+router.get('/', async (req, res, next) => {
+  try {
+    const { tag, q, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+    const params = [];
+    let where = "WHERE status = 'active'";
+
+    if (tag) {
+      params.push(tag);
+      where += \` AND $\{params.length\} = ANY(tags)\`;
+    }
+    if (q) {
+      params.push(q);
+      where += \` AND search_vector @@ plainto_tsquery('english', $\{params.length\})\`;
+    }
+
+    params.push(limit, offset);
+    const { rows } = await pool.query(
+      \`SELECT id, name, address, postcode, latitude, longitude,
+              website, description, tags, created_at
+       FROM shops $\{where\}
+       ORDER BY name ASC
+       LIMIT $\{params.length - 1\} OFFSET $\{params.length\}\`,
+      params
+    );
+
+    const { rows: [{ count }] } = await pool.query(
+      \`SELECT COUNT(*) FROM shops $\{where\}\`,
+      params.slice(0, -2)
+    );
+
+    res.json({ shops: rows, total: parseInt(count), page, limit });
+  } catch (e) { next(e); }
+});
+
+// GET /api/shops/:id
+router.get('/:id', async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT * FROM shops WHERE id = $1 AND status = $2',
+      [req.params.id, 'active']
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Shop not found' });
+    res.json(rows[0]);
+  } catch (e) { next(e); }
+});
+
+// POST /api/shops/submit — public crowdsource
+router.post('/submit', async (req, res, next) => {
+  try {
+    const { name, address, postcode, website, description, tags, email } = req.body;
+    if (!name || !postcode) return res.status(400).json({ error: 'name and postcode required' });
+
+    // Geocode via Postcodes.io (free, no key needed)
+    const geo = await fetch(\`https://api.postcodes.io/postcodes/\${postcode}\`);
+    const { result } = await geo.json();
+    const lat = result?.latitude;
+    const lng = result?.longitude;
+
+    await pool.query(
+      \`INSERT INTO pending_submissions (shop_data, submitter_email, ip_address)
+       VALUES ($1, $2, $3)\`,
+      [JSON.stringify({ name, address, postcode, website, description, tags, lat, lng }),
+       email, req.ip]
+    );
+
+    res.status(201).json({ message: 'Submission received. Thank you!' });
+  } catch (e) { next(e); }
+});
+
+export default router;` },
+
+  seed: { path:'db/seed.json', lang:'JSON', code:
+`[
+  {
+    "name": "The Refill Pantry",
+    "address": "14 Brick Lane, London",
+    "postcode": "E1 6RF",
+    "latitude": 51.5213,
+    "longitude": -0.0714,
+    "website": "https://therefillpantry.co.uk",
+    "description": "London's original zero-waste grocery. Bring your own containers for pasta, grains, oils and cleaning products.",
+    "tags": ["food refill", "household refill", "loose produce"],
+    "status": "active"
+  },
+  {
+    "name": "Edinburgh Eco Store",
+    "address": "22 Grassmarket, Edinburgh",
+    "postcode": "EH1 2JU",
+    "latitude": 55.9477,
+    "longitude": -3.1921,
+    "website": "https://edinburghecostore.com",
+    "description": "Scotland's favourite zero-waste shop. Over 300 products.",
+    "tags": ["food refill", "cosmetics", "loose herbs"],
+    "status": "active"
+  },
+  {
+    "name": "Manchester Bulk & Brew",
+    "address": "7 Northern Quarter, Manchester",
+    "postcode": "M4 1HB",
+    "latitude": 53.4843,
+    "longitude": -2.2326,
+    "website": "https://bulkandbrew.co.uk",
+    "description": "Organic bulk dry goods, coffee, and a zero-waste café.",
+    "tags": ["food refill", "café", "organic"],
+    "status": "active"
+  }
+]` },
+
+  page: { path:'frontend/app/page.jsx', lang:'JSX', code:
+`'use client';
+import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import ShopCard from '@/components/ShopCard';
+import SearchBar from '@/components/SearchBar';
+
+// Leaflet must be loaded client-side only
+const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
+
+export default function HomePage() {
+  const [shops, setShops]       = useState([]);
+  const [query, setQuery]       = useState('');
+  const [radius, setRadius]     = useState(10);
+  const [loading, setLoading]   = useState(false);
+  const [selected, setSelected] = useState(null);
+
+  const searchByLocation = useCallback(async (lat, lng) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        \`\${process.env.NEXT_PUBLIC_API_URL}/shops/nearby?lat=\${lat}&lng=\${lng}&radius=\${radius}\`
+      );
+      const data = await res.json();
+      setShops(data.shops);
+    } finally {
+      setLoading(false);
+    }
+  }, [radius]);
+
+  const searchByPostcode = useCallback(async (postcode) => {
+    setLoading(true);
+    try {
+      // Geocode postcode
+      const geo = await fetch(\`https://api.postcodes.io/postcodes/\${postcode}\`);
+      const { result } = await geo.json();
+      if (result) await searchByLocation(result.latitude, result.longitude);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchByLocation]);
+
+  const handleLocate = () => {
+    navigator.geolocation?.getCurrentPosition(
+      pos => searchByLocation(pos.coords.latitude, pos.coords.longitude),
+      () => alert('Could not get your location')
+    );
+  };
+
+  return (
+    <main>
+      {/* Full-width map */}
+      <MapView shops={shops} onShopSelect={setSelected} />
+
+      {/* Search hero */}
+      <section className="bg-orange-500 py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="font-quicksand text-3xl font-bold text-white mb-4">
+            Find Zero Waste Shops Near You
+          </h1>
+          <SearchBar
+            query={query}
+            radius={radius}
+            onQueryChange={setQuery}
+            onRadiusChange={setRadius}
+            onSearch={() => searchByPostcode(query)}
+            onLocate={handleLocate}
+          />
+        </div>
+      </section>
+
+      {/* Shop grid */}
+      <section className="max-w-6xl mx-auto px-4 py-10">
+        {loading ? (
+          <p className="text-center text-gray-500">Searching…</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {shops.map(shop => (
+              <ShopCard
+                key={shop.id}
+                shop={shop}
+                isSelected={selected?.id === shop.id}
+                onClick={() => setSelected(shop)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}` },
+
+  map: { path:'frontend/components/MapView.jsx', lang:'JSX', code:
+`'use client';
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Custom green pin SVG
+const greenPin = L.divIcon({
+  className: '',
+  iconSize: [28, 36],
+  iconAnchor: [14, 36],
+  popupAnchor: [0, -36],
+  html: \`<svg viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.3 21.7 0 14 0z" fill="#00d8b5"/>
+    <circle cx="14" cy="14" r="6" fill="white"/>
+  </svg>\`
+});
+
+export default function MapView({ shops, onShopSelect }) {
+  const mapRef  = useRef(null);
+  const leafRef = useRef(null);
+  const markersRef = useRef([]);
+
+  useEffect(() => {
+    if (leafRef.current) return; // already init
+    leafRef.current = L.map(mapRef.current).setView([53.0, -2.0], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(leafRef.current);
+  }, []);
+
+  useEffect(() => {
+    const map = leafRef.current;
+    if (!map) return;
+
+    // Clear old markers
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    shops.forEach(shop => {
+      const marker = L.marker([shop.latitude, shop.longitude], { icon: greenPin })
+        .addTo(map)
+        .bindPopup(\`
+          <strong>\${shop.name}</strong><br>
+          <small>\${shop.address}</small><br>
+          \${shop.distance_km ? \`<em>\${shop.distance_km} km away</em>\` : ''}
+        \`);
+      marker.on('click', () => onShopSelect(shop));
+      markersRef.current.push(marker);
+    });
+
+    if (shops.length > 0) {
+      const bounds = L.latLngBounds(shops.map(s => [s.latitude, s.longitude]));
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }, [shops, onShopSelect]);
+
+  return <div ref={mapRef} style={{ height: '420px', width: '100%' }} />;
+}` },
+
+  shopcard: { path:'frontend/components/ShopCard.jsx', lang:'JSX', code:
+`export default function ShopCard({ shop, isSelected, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      className={\`
+        bg-white rounded-xl p-5 border cursor-pointer transition-all duration-200
+        hover:-translate-y-1 hover:shadow-lg
+        \${isSelected ? 'border-teal-400 shadow-md ring-2 ring-teal-200' : 'border-gray-100 shadow-sm'}
+      \`}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="font-quicksand font-bold text-navy text-base leading-tight">
+          {shop.name}
+        </h3>
+        {shop.distance_km && (
+          <span className="text-xs font-semibold text-teal-600 ml-2 whitespace-nowrap">
+            {shop.distance_km} km
+          </span>
+        )}
+      </div>
+
+      <p className="text-xs text-gray-500 mb-2">📍 {shop.address}</p>
+
+      {shop.description && (
+        <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
+          {shop.description}
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {(shop.tags || []).map(tag => (
+          <span
+            key={tag}
+            className="text-xs font-semibold px-2 py-0.5 rounded-full
+                       bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wide"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {shop.website && (
+        <a
+          href={shop.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="text-xs font-semibold text-orange-500 hover:text-teal-600 transition-colors"
+        >
+          🌐 {shop.website.replace(/^https?:\\/\\//, '')}
+        </a>
+      )}
+    </div>
+  );
+}` },
+
+  env: { path:'.env.example', lang:'ENV', code:
+`# ── Backend (.env in /backend) ────────────────────────
+
+# PostgreSQL connection string
+DATABASE_URL=postgresql://user:password@localhost:5432/zerowaste
+
+# Redis (optional — for caching)
+REDIS_URL=redis://localhost:6379
+
+# Frontend URL (for CORS)
+FRONTEND_URL=http://localhost:3000
+
+# Admin JWT secret
+JWT_SECRET=your-very-secret-key-change-this
+
+# Email (Resend.com — free tier)
+RESEND_API_KEY=re_xxxxxxxxxxxx
+
+# Rate limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+
+
+# ── Frontend (.env.local in /frontend) ────────────────
+
+# Backend API base URL
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+
+# NextAuth (for admin panel)
+NEXTAUTH_SECRET=another-secret-key
+NEXTAUTH_URL=http://localhost:3000
+
+# GitHub OAuth (create at github.com/settings/apps)
+GITHUB_CLIENT_ID=Ov23xxxxxxxxxxxx
+GITHUB_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx`}
+};
+
+function showFile(key) {
+  document.querySelectorAll('.code-file-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.code-file-btn').classList.add('active');
+  const f = files[key];
+  document.getElementById('codeFilepath').textContent = f.path;
+  document.getElementById('codeLang').textContent = f.lang;
+  document.getElementById('codeBlock').textContent = f.code;
+  window._currentCode = f.code;
+}
+
+function copyCode() {
+  if (!window._currentCode) return;
+  navigator.clipboard.writeText(window._currentCode).then(() => {
+    const btn = document.querySelector('.code-copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+/* ── Init ─────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  renderShops(shops);
+  showFile('schema');
+  // Delay map init to ensure DOM is ready
+  setTimeout(initMap, 100);
+});
+</script>
+</body>
+</html>

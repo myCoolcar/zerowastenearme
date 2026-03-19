@@ -13,12 +13,11 @@
   --amber:#ffbb53;--amber-d:#f0a830;--mint:#00d8b5;--mint-d:#00b89a;
   --cyan:#00c1ef;--orange:#ff7646;--navy:#04455c;--navy-l:#0a5a78;
   --teal:#1d93a3;--text:#1c2f38;--muted:#6b8c99;--border:#e0eff3;--light:#f4fbfa;
+  --red:#e53e3e;--red-light:#fff5f5;--red-border:#fed7d7;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
-
-/* HEADER */
 .site-header{background:var(--amber);position:sticky;top:0;z-index:1000;box-shadow:0 2px 16px rgba(4,69,92,.18)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:62px;max-width:1400px;margin:0 auto}
 .site-logo{display:flex;align-items:center;text-decoration:none}
@@ -33,14 +32,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .nav-link.cta:hover{background:var(--navy-l)}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px}
 .hamburger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px}
-
-/* PAGE HERO */
 .page-hero{background:var(--navy);padding:52px 32px;position:relative;overflow:hidden}
 .page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 100% 50%,rgba(0,216,181,.1) 0%,transparent 65%);pointer-events:none}
 .page-hero-inner{max-width:1300px;margin:0 auto;position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .breadcrumb{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:14px;display:flex;align-items:center;gap:6px}
-.breadcrumb a{color:rgba(255,255,255,.45);text-decoration:none}
-.breadcrumb a:hover{color:var(--mint)}
+.breadcrumb a{color:rgba(255,255,255,.45);text-decoration:none}.breadcrumb a:hover{color:var(--mint)}
 .breadcrumb span{color:rgba(255,255,255,.2)}
 .hero-text h1{font-family:'Quicksand',sans-serif;font-weight:700;font-size:clamp(26px,4vw,40px);color:white;margin-bottom:10px;line-height:1.1}
 .hero-text h1 em{font-style:normal;color:var(--amber)}
@@ -49,14 +45,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .h-stat{text-align:center;background:rgba(255,255,255,.07);border-radius:12px;padding:16px 20px;border:1px solid rgba(255,255,255,.1)}
 .h-stat-num{font-family:'Quicksand',sans-serif;font-weight:700;font-size:28px;color:var(--mint);display:block}
 .h-stat-label{font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px}
-
-/* CONTROLS BAR */
 .controls-bar{background:white;border-bottom:1.5px solid var(--border);padding:14px 32px;position:sticky;top:62px;z-index:900}
 .controls-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .search-field{display:flex;align-items:center;gap:8px;background:var(--light);border:1.5px solid var(--border);border-radius:10px;padding:9px 14px;flex:1;min-width:220px;transition:border-color .15s}
 .search-field:focus-within{border-color:var(--mint);background:white}
 .search-field input{border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:transparent;width:100%}
-.filter-select{padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:white;outline:none;cursor:pointer;transition:border-color .15s}
+.filter-select{padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:white;outline:none;cursor:pointer}
 .filter-select:focus{border-color:var(--mint)}
 .btn-locate-bar{display:flex;align-items:center;gap:6px;background:var(--navy);color:white;border:none;padding:10px 16px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap}
 .btn-locate-bar:hover{background:var(--navy-l)}
@@ -65,29 +59,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .view-btn.active{background:white;color:var(--navy);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .result-label{font-size:13px;color:var(--muted);white-space:nowrap}
 .result-label strong{color:var(--navy)}
-
-/* TAG CHIPS */
 .tag-row{background:white;border-bottom:1.5px solid var(--border);padding:10px 32px}
 .tag-row-inner{max-width:1300px;margin:0 auto;display:flex;gap:6px;flex-wrap:wrap}
 .tag-chip{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .18s;white-space:nowrap}
 .tag-chip:hover{border-color:var(--mint);color:var(--teal)}
 .tag-chip.active{background:var(--navy);border-color:var(--navy);color:white}
-
-/* MAP */
 .map-section{position:relative}
 #fullmap{width:100%;height:440px;display:none}
 #fullmap.visible{display:block}
-
-/* GRID VIEW */
 .shops-outer{max-width:1300px;margin:0 auto;padding:32px 28px 60px}
 .shops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-
-/* LIST VIEW */
 .shops-list{display:flex;flex-direction:column;gap:10px}
-.shop-list-item{background:white;border-radius:12px;border:1.5px solid var(--border);padding:18px 22px;display:flex;align-items:center;gap:18px;cursor:pointer;transition:all .2s}
+.shop-list-item{background:white;border-radius:12px;border:1.5px solid var(--border);padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .2s}
 .shop-list-item:hover{border-color:var(--mint);box-shadow:0 4px 16px rgba(4,69,92,.09);transform:translateX(2px)}
-.shop-list-item.highlighted{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,118,70,.15)}
-.sli-accent{width:5px;min-height:60px;border-radius:4px;background:linear-gradient(180deg,var(--mint),var(--cyan));flex-shrink:0}
+.sli-accent{width:5px;min-height:56px;border-radius:4px;background:linear-gradient(180deg,var(--mint),var(--cyan));flex-shrink:0}
 .sli-body{flex:1;min-width:0}
 .sli-top{display:flex;align-items:baseline;gap:10px;margin-bottom:3px}
 .sli-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -95,13 +80,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .sli-addr{font-size:12px;color:var(--muted);margin-bottom:6px}
 .sli-tags{display:flex;flex-wrap:wrap;gap:4px}
 .sli-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:12px;background:rgba(0,216,181,.1);color:var(--teal);border:1px solid rgba(0,216,181,.2);text-transform:uppercase;letter-spacing:.2px}
-.sli-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+.sli-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
 .sli-link{font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
 .sli-link:hover{color:var(--teal)}
 .btn-sli-map{font-size:12px;font-weight:600;color:var(--navy);background:none;border:1.5px solid var(--border);padding:5px 10px;border-radius:7px;cursor:pointer;transition:all .15s}
 .btn-sli-map:hover{background:var(--mint);border-color:var(--mint)}
-
-/* CARD VIEW */
 .shop-card{background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;cursor:pointer;transition:all .22s cubic-bezier(.34,1.3,.64,1);animation:fadeUp .4s both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 .shop-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(4,69,92,.12);border-color:var(--mint)}
@@ -112,33 +95,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .shop-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:var(--navy);line-height:1.2}
 .shop-dist{font-size:11px;font-weight:700;color:var(--teal);background:rgba(0,193,239,.1);padding:3px 8px;border-radius:10px;white-space:nowrap;margin-left:8px;flex-shrink:0}
 .shop-address{font-size:12px;color:var(--muted);margin-bottom:9px}
-.shop-desc{font-size:13px;color:#3a5560;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.shop-desc-preview{font-size:13px;color:#3a5560;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .shop-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
 .shop-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;background:rgba(0,216,181,.1);color:var(--teal);border:1px solid rgba(0,216,181,.2);text-transform:uppercase;letter-spacing:.2px}
 .shop-tag.orange{background:rgba(255,118,70,.1);color:var(--orange);border-color:rgba(255,118,70,.2)}
 .shop-tag.blue{background:rgba(0,193,239,.1);color:#0086b3;border-color:rgba(0,193,239,.2)}
-.shop-card-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-top:1px solid var(--border);background:#fafeff}
-.shop-website{font-size:12px;font-weight:600;color:var(--orange);text-decoration:none}
+.shop-card-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 10px 20px;border-top:1px solid var(--border);background:#fafeff;gap:6px}
+.shop-website{font-size:12px;font-weight:600;color:var(--orange);text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .shop-website:hover{color:var(--teal)}
-.btn-map{font-size:12px;font-weight:600;color:var(--navy);background:none;border:1.5px solid var(--border);padding:5px 10px;border-radius:7px;cursor:pointer;transition:all .15s}
+.card-footer-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.btn-map{font-size:12px;font-weight:600;color:var(--navy);background:none;border:1.5px solid var(--border);padding:5px 10px;border-radius:7px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-map:hover{background:var(--mint);border-color:var(--mint)}
-
-/* PAGINATION */
+.btn-flag-card{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;border:1.5px solid transparent;background:none;cursor:pointer;color:#ccc;font-size:13px;transition:all .2s;flex-shrink:0}
+.btn-flag-card:hover{border-color:var(--red-border);background:var(--red-light);color:var(--red)}
 .pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:36px;flex-wrap:wrap}
 .page-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--navy);cursor:pointer;transition:all .15s}
 .page-btn:hover{border-color:var(--mint);color:var(--teal)}
 .page-btn.active{background:var(--navy);border-color:var(--navy);color:white}
 .page-btn.disabled{opacity:.35;cursor:not-allowed}
 .page-info{font-size:13px;color:var(--muted);padding:0 10px}
-
-/* LOADING / EMPTY */
 .loading-state,.empty-state{text-align:center;padding:60px 20px;color:var(--muted);grid-column:1/-1}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--mint);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-state .icon{font-size:44px;margin-bottom:10px}
 .empty-state h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px;color:var(--navy);margin-bottom:5px}
-
-/* POPUP */
 .leaflet-popup-content-wrapper{border-radius:12px!important;box-shadow:0 6px 24px rgba(0,0,0,.18)!important;border:none!important;padding:0!important;overflow:hidden}
 .leaflet-popup-content{margin:0!important}
 .popup-card{padding:14px 16px;min-width:200px;max-width:260px}
@@ -147,15 +127,57 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .popup-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px}
 .popup-tag{font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:rgba(0,216,181,.12);color:var(--teal);text-transform:uppercase}
 .popup-link{font-size:11px;font-weight:600;color:var(--orange);text-decoration:none}
+.popup-detail-btn{display:block;width:100%;margin-top:8px;padding:7px;background:var(--navy);color:white;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:background .15s}
+.popup-detail-btn:hover{background:var(--navy-l)}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(4,69,92,.55);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+/* ── DRAWER ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(4,69,92,.4);backdrop-filter:blur(3px);z-index:2500;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.shop-drawer{position:fixed;top:0;right:0;height:100vh;width:520px;max-width:100vw;background:white;z-index:2600;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-8px 0 48px rgba(4,69,92,.2)}
+.shop-drawer.open{transform:translateX(0)}
+.drawer-header{padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid var(--border);flex-shrink:0;background:white;position:sticky;top:0;z-index:10}
+.drawer-header-left{display:flex;align-items:center;gap:10px}
+.drawer-back{background:var(--light);border:none;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;transition:all .15s}
+.drawer-back:hover{background:var(--border);color:var(--navy)}
+.drawer-header-label{font-size:13px;font-weight:600;color:var(--muted)}
+.drawer-body{flex:1;overflow-y:auto;padding:0}
+.drawer-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-l) 100%);padding:28px;position:relative;overflow:hidden}
+.drawer-hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 90% 50%,rgba(0,216,181,.12) 0%,transparent 70%);pointer-events:none}
+.drawer-shop-name{font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:white;line-height:1.2;margin-bottom:12px;position:relative;z-index:1}
+.drawer-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;position:relative;z-index:1}
+.drawer-tag{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.4px}
+.drawer-meta-chips{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.drawer-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:rgba(255,255,255,.75);background:rgba(255,255,255,.1);padding:4px 11px;border-radius:20px}
+.drawer-section{padding:20px 28px;border-bottom:1.5px solid var(--border)}
+.drawer-section:last-of-type{border-bottom:none}
+.drawer-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px}
+.drawer-description{font-size:14px;color:#2e4550;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.drawer-info-row{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.drawer-info-row:last-child{border-bottom:none}
+.drawer-info-icon{width:30px;height:30px;background:var(--light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.drawer-info-content{flex:1;min-width:0}
+.drawer-info-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:3px}
+.drawer-info-value{font-size:14px;color:var(--text);line-height:1.45;word-break:break-word}
+.drawer-info-value a{color:var(--teal);font-weight:600;text-decoration:none}
+.drawer-info-value a:hover{color:var(--orange)}
+.drawer-mini-map{height:180px;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);margin-top:4px}
+.drawer-actions{padding:16px 24px 24px;display:flex;gap:8px;flex-shrink:0;border-top:1.5px solid var(--border);background:white;position:sticky;bottom:0}
+.btn-drawer-website{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--mint);color:var(--navy);border:none;padding:12px 16px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-drawer-website:hover{background:var(--mint-d);transform:translateY(-1px)}
+.btn-drawer-map{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--light);color:var(--navy);border:1.5px solid var(--border);padding:12px 14px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-drawer-map:hover{border-color:var(--teal);background:rgba(29,147,163,.06)}
+.btn-drawer-flag{display:flex;align-items:center;justify-content:center;gap:6px;background:white;color:var(--red);border:1.5px solid var(--red-border);padding:12px 14px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-drawer-flag:hover{background:var(--red-light)}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(4,69,92,.55);backdrop-filter:blur(4px);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{background:white;border-radius:18px;padding:32px;max-width:500px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.28);transform:translateY(18px);transition:transform .25s;max-height:90vh;overflow-y:auto}
 .modal-overlay.open .modal{transform:translateY(0)}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .modal-title{font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:var(--navy)}
-.modal-close{background:var(--light);border:none;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal-close{background:var(--light);border:none;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{background:var(--border);color:var(--navy)}
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:5px}
 .req{color:var(--orange)}
@@ -170,18 +192,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
 .btn-form-submit{width:100%;padding:12px;background:var(--mint);color:var(--navy);border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;margin-top:6px}
 .btn-form-submit:hover{background:var(--mint-d)}
 .btn-form-submit:disabled{opacity:.6;cursor:not-allowed}
-.form-success{text-align:center;padding:24px}
-.form-success .s-icon{font-size:44px;margin-bottom:10px}
+.btn-form-flag-submit{width:100%;padding:12px;background:var(--red);color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;margin-top:8px}
+.btn-form-flag-submit:hover{background:#c53030}
+.btn-form-flag-submit:disabled{opacity:.6;cursor:not-allowed}
+.form-success{text-align:center;padding:20px}
+.form-success .s-icon{font-size:48px;margin-bottom:12px}
 .form-success h3{font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:var(--navy);margin-bottom:6px}
-.form-success p{font-size:13px;color:var(--muted)}
-
-/* FOOTER */
+.form-success p{font-size:13px;color:var(--muted);line-height:1.6}
+.flag-options{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.flag-option{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s}
+.flag-option:hover{border-color:var(--red-border);background:var(--red-light)}
+.flag-option.selected{border-color:var(--red);background:var(--red-light)}
+.flag-option input[type=radio]{accent-color:var(--red);width:16px;height:16px;flex-shrink:0;cursor:pointer;margin-top:2px}
+.flag-option-label{font-size:13px;font-weight:600;color:var(--text);cursor:pointer;line-height:1.3}
+.flag-option-label span{font-size:11px;color:var(--muted);font-weight:400;display:block;margin-top:2px}
 .site-footer{background:var(--navy);padding:32px;text-align:center}
 .footer-links{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-bottom:14px}
 .footer-links a{font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .15s}
 .footer-links a:hover{color:var(--mint)}
 .footer-copy{font-size:12px;color:rgba(255,255,255,.28)}
-
 @media(max-width:768px){
   .site-nav{display:none}
   .site-nav.open{display:flex;flex-direction:column;position:absolute;top:62px;left:0;right:0;background:var(--amber);padding:12px;gap:4px;box-shadow:0 8px 20px rgba(0,0,0,.12);z-index:999}
@@ -195,6 +224,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
   .form-row-2{grid-template-columns:1fr}
   .view-toggle{display:none}
   .sli-right{display:none}
+  .shop-drawer{width:100vw}
+  .drawer-actions{flex-wrap:wrap}
+  .btn-drawer-website{flex:1 1 100%;order:-1}
 }
 </style>
 </head>
@@ -213,7 +245,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
       <a class="nav-link" href="/pages/locations">Locations</a>
       <a class="nav-link active" href="/pages/shops">Shops</a>
       <a class="nav-link" href="/pages/blog">Blog</a>
-      <a class="nav-link cta" href="#" onclick="openModal();return false">+ Add to Map</a>
+      <a class="nav-link cta" href="#" onclick="openSubmitModal();return false">+ Add to Map</a>
     </nav>
     <button class="hamburger" onclick="document.getElementById('siteNav').classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
@@ -233,7 +265,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
   </div>
 </section>
 
-<!-- CONTROLS -->
 <div class="controls-bar">
   <div class="controls-inner">
     <div class="search-field">
@@ -254,7 +285,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
   </div>
 </div>
 
-<!-- TAG CHIPS -->
 <div class="tag-row">
   <div class="tag-row-inner">
     <button class="tag-chip active" onclick="filterTag('all',this)">All</button>
@@ -265,19 +295,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
     <button class="tag-chip" onclick="filterTag('loose produce',this)">🥕 Loose Produce</button>
     <button class="tag-chip" onclick="filterTag('community',this)">🤝 Community</button>
     <button class="tag-chip" onclick="filterTag('plastic-free',this)">♻ Plastic-Free</button>
+    <button class="tag-chip" onclick="filterTag('reuse_hub',this)">♻️ Reuse</button>
     <button class="tag-chip" onclick="filterTag('café',this)">☕ Café</button>
   </div>
 </div>
 
-<!-- MAP -->
 <div class="map-section"><div id="fullmap"></div></div>
 
-<!-- SHOPS -->
 <div class="shops-outer">
   <div id="shopsContainer">
-    <div class="shops-grid">
-      <div class="loading-state"><div class="spinner"></div><p>Loading shops…</p></div>
-    </div>
+    <div class="shops-grid"><div class="loading-state"><div class="spinner"></div><p>Loading shops…</p></div></div>
   </div>
   <div id="paginationWrap"></div>
 </div>
@@ -290,14 +317,73 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
   <p class="footer-copy">© 2025 Zero Waste Near Me. All rights reserved.</p>
 </footer>
 
-<!-- SUBMIT MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- SHOP DETAIL DRAWER -->
+<aside class="shop-drawer" id="shopDrawer" role="dialog" aria-modal="true">
+  <div class="drawer-header">
+    <div class="drawer-header-left">
+      <button class="drawer-back" onclick="closeDrawer()">✕</button>
+      <span class="drawer-header-label">Shop details</span>
+    </div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-actions" id="drawerActions"></div>
+</aside>
+
+<!-- FLAG MODAL -->
+<div class="modal-overlay" id="flagOverlay" onclick="if(event.target===this)closeFlagModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">🚩 Flag this listing</h2>
+      <button class="modal-close" onclick="closeFlagModal()">✕</button>
+    </div>
+    <div id="flagBody">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.6">Help keep the directory accurate. We review every report and will update or remove the listing if needed.</p>
+      <div class="form-group">
+        <label class="form-label">What's the issue? <span class="req">*</span></label>
+        <div class="flag-options">
+          <label class="flag-option" onclick="selectFlagOption(this)">
+            <input type="radio" name="flagReason" value="permanently_closed">
+            <div class="flag-option-label">Shop is permanently closed<span>This location no longer operates as a zero waste shop</span></div>
+          </label>
+          <label class="flag-option" onclick="selectFlagOption(this)">
+            <input type="radio" name="flagReason" value="wrong_address">
+            <div class="flag-option-label">Wrong or outdated address<span>The location shown on the map is incorrect</span></div>
+          </label>
+          <label class="flag-option" onclick="selectFlagOption(this)">
+            <input type="radio" name="flagReason" value="duplicate">
+            <div class="flag-option-label">Duplicate listing<span>This shop already appears elsewhere in the directory</span></div>
+          </label>
+          <label class="flag-option" onclick="selectFlagOption(this)">
+            <input type="radio" name="flagReason" value="other">
+            <div class="flag-option-label">Other issue<span>Something else is wrong with this listing</span></div>
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Additional details <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <textarea class="form-textarea" id="flagDetails" rows="3" placeholder="Any extra information that might help us review this…"></textarea>
+      </div>
+      <button class="btn-form-flag-submit" id="flagSubmitBtn" onclick="submitFlag()">Submit Report</button>
+    </div>
+    <div class="form-success" id="flagSuccess" style="display:none">
+      <div class="s-icon">🙏</div>
+      <h3>Report received</h3>
+      <p>Thank you — we'll review this listing and update or remove it if needed. Reports like yours keep the directory accurate for everyone.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SHOP MODAL -->
+<div class="modal-overlay" id="submitOverlay" onclick="if(event.target===this)closeSubmitModal()">
   <div class="modal">
     <div class="modal-header">
       <h2 class="modal-title">Add a Shop to the Map</h2>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeSubmitModal()">✕</button>
     </div>
-    <div id="formBody">
+    <div id="submitFormBody">
       <div class="form-row-2">
         <div class="form-group"><label class="form-label">Shop Name <span class="req">*</span></label><input class="form-input" id="f-name" placeholder="The Refill Pantry"></div>
         <div class="form-group"><label class="form-label">Postcode <span class="req">*</span></label><input class="form-input" id="f-postcode" placeholder="E1 6RF"></div>
@@ -319,7 +405,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--text)}
       <div class="form-group"><label class="form-label">Your Email <span style="color:var(--muted);font-weight:400">(optional)</span></label><input class="form-input" type="email" id="f-email" placeholder="hello@example.com"></div>
       <button class="btn-form-submit" id="submitBtn" onclick="submitShop()">Submit for Review →</button>
     </div>
-    <div class="form-success" id="formSuccess" style="display:none">
+    <div class="form-success" id="submitSuccess" style="display:none">
       <div class="s-icon">🌿</div><h3>Thank you!</h3>
       <p>Your submission will be reviewed within 48 hours and added to the map once approved.</p>
     </div>
@@ -331,75 +417,55 @@ const SUPABASE_URL='https://xmrqlhkneffuqdibqrjj.supabase.co';
 const SUPABASE_KEY='sb_publishable_AV8VQGAwXuUT9PjiBYlWkA_f1z_J6RI';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const TAG_COLORS={'household refill':'orange','community':'orange','beauty':'blue','plastic-free':'blue','café':'blue'};
+const TAG_COLORS={'household refill':'orange','community':'orange','reuse_hub':'orange','beauty':'blue','plastic-free':'blue','café':'blue'};
 const PER_PAGE=24;
-let allShops=[],filtered=[],markers=[],fullMap,userLat=null,userLng=null;
-let currentPage=1,activeTag='all',currentView='grid';
+let allShops=[],filtered=[],markers=[],fullMap,drawerMiniMap=null;
+let userLat=null,userLng=null,currentPage=1,activeTag='all',currentView='grid';
+let flagTargetShop=null;
 
-// ── MAP ──
+// MAP
 function initMap(){
   fullMap=L.map('fullmap').setView([54,-2],6);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(fullMap);
 }
-const pinIcon=()=>L.divIcon({className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32],
-  html:'<svg viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg" width="24" height="30"><path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 18 12 18s12-9 12-18C24 5.37 18.63 0 12 0z" fill="#00d8b5"/><circle cx="12" cy="12" r="5" fill="white"/></svg>'});
+const pinIcon=()=>L.divIcon({className:'',iconSize:[24,30],iconAnchor:[12,30],popupAnchor:[0,-32],html:'<svg viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg" width="24" height="30"><path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 18 12 18s12-9 12-18C24 5.37 18.63 0 12 0z" fill="#00d8b5"/><circle cx="12" cy="12" r="5" fill="white"/></svg>'});
 
 function plotAll(shops){
   markers.forEach(m=>m.remove());markers=[];
   shops.forEach(s=>{
     if(!s.latitude||!s.longitude)return;
     const m=L.marker([s.latitude,s.longitude],{icon:pinIcon()}).addTo(fullMap);
-    m.bindPopup(`<div class="popup-card"><div class="popup-name">${s.name}</div><div class="popup-addr">📍 ${s.address||''}${s.postcode?', '+s.postcode:''}</div><div class="popup-tags">${(s.tags||[]).map(t=>`<span class="popup-tag">${t}</span>`).join('')}</div>${s.website?`<a class="popup-link" href="${s.website}" target="_blank" rel="noopener">🌐 Website</a>`:''}</div>`,{maxWidth:280});
+    m.bindPopup(`<div class="popup-card"><div class="popup-name">${s.name}</div><div class="popup-addr">📍 ${s.address||''}${s.postcode?', '+s.postcode:''}</div><div class="popup-tags">${(s.tags||[]).map(t=>`<span class="popup-tag">${t}</span>`).join('')}</div>${s.website?`<a class="popup-link" href="${s.website}" target="_blank" rel="noopener">🌐 Website</a>`:''}<button class="popup-detail-btn" onclick="openDrawer(${s.id})">View full details →</button></div>`,{maxWidth:280});
     markers.push(m);
   });
 }
 
-// ── LOAD ──
+// LOAD
 async function loadShops(){
   const{data,error}=await sb.from('shops').select('*').eq('status','active').order('name');
   if(error){document.getElementById('shopsContainer').innerHTML='<div class="empty-state"><div class="icon">⚠️</div><h3>Error loading shops</h3><p>'+error.message+'</p></div>';return;}
   allShops=data||[];
   const cities=new Set(allShops.map(s=>(s.postcode||'').split(' ')[0]).filter(Boolean));
-  document.getElementById('statTotal').textContent=allShops.length;
+  document.getElementById('statTotal').textContent=allShops.length.toLocaleString();
   document.getElementById('statCities').textContent=cities.size;
   filtered=[...allShops];
   renderPage();
 }
 
-// ── SEARCH + FILTER ──
+// SEARCH
 let searchTimer;
 function onSearchInput(){clearTimeout(searchTimer);searchTimer=setTimeout(triggerSearch,300);}
-
 async function triggerSearch(){
   const q=document.getElementById('searchInput').value.trim();
   if(!q){filtered=[...allShops];applyTagFilter();return;}
   const ql=q.toLowerCase();
-  let res=allShops.filter(s=>
-    (s.name||'').toLowerCase().includes(ql)||
-    (s.address||'').toLowerCase().includes(ql)||
-    (s.postcode||'').toLowerCase().replace(' ','').includes(ql.replace(' ',''))||
-    (s.tags||[]).some(t=>t.includes(ql))
-  );
+  let res=allShops.filter(s=>(s.name||'').toLowerCase().includes(ql)||(s.address||'').toLowerCase().includes(ql)||(s.postcode||'').toLowerCase().replace(' ','').includes(ql.replace(' ',''))||(s.tags||[]).some(t=>t.includes(ql)));
   if(!res.length&&/^[a-z]{1,2}\d/i.test(q)){
-    try{
-      const r=await fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(q));
-      const j=await r.json();
-      if(j.status===200&&j.result){
-        const{latitude:lat,longitude:lng}=j.result;
-        const R=3958.8;
-        res=allShops.map(s=>({...s,distMi:Math.round(2*R*Math.asin(Math.sqrt(Math.sin(((s.latitude-lat)*Math.PI/180)/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(s.latitude*Math.PI/180)*Math.sin(((s.longitude-lng)*Math.PI/180)/2)**2))*10)/10}))
-          .sort((a,b)=>a.distMi-b.distMi);
-      }
-    }catch(e){}
+    try{const r=await fetch('https://api.postcodes.io/postcodes/'+encodeURIComponent(q));const j=await r.json();if(j.status===200&&j.result){const{latitude:lat,longitude:lng}=j.result;const R=3958.8;res=allShops.map(s=>({...s,distMi:Math.round(2*R*Math.asin(Math.sqrt(Math.sin(((s.latitude-lat)*Math.PI/180)/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(s.latitude*Math.PI/180)*Math.sin(((s.longitude-lng)*Math.PI/180)/2)**2))*10)/10})).sort((a,b)=>a.distMi-b.distMi);}}catch(e){}
   }
   filtered=res;applyTagFilter();
 }
-
-function filterTag(tag,btn){
-  document.querySelectorAll('.tag-chip').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');activeTag=tag;applyTagFilter();
-}
-
+function filterTag(tag,btn){document.querySelectorAll('.tag-chip').forEach(c=>c.classList.remove('active'));btn.classList.add('active');activeTag=tag;applyTagFilter();}
 function applyTagFilter(){
   let list=activeTag==='all'?filtered:filtered.filter(s=>(s.tags||[]).includes(activeTag));
   const sort=document.getElementById('sortSelect').value;
@@ -407,49 +473,45 @@ function applyTagFilter(){
   currentPage=1;renderShops(list);
   if(currentView==='map')plotAll(list);
 }
-
 function renderPage(){applyTagFilter();}
 
-// ── RENDER ──
+// RENDER
 function renderShops(list){
   const total=list.length;
   document.getElementById('resultLabel').innerHTML=`<strong>${total.toLocaleString()}</strong> shop${total!==1?'s':''}`;
-  const start=(currentPage-1)*PER_PAGE, end=start+PER_PAGE;
-  const page=list.slice(start,end);
+  const page=list.slice((currentPage-1)*PER_PAGE,currentPage*PER_PAGE);
   const wrap=document.getElementById('shopsContainer');
-  if(!page.length){
-    wrap.innerHTML='<div class="empty-state"><div class="icon">🌿</div><h3>No shops found</h3><p>Try a different search or tag filter.</p></div>';
-    document.getElementById('paginationWrap').innerHTML='';return;
-  }
-  if(currentView==='list'){
-    wrap.innerHTML='<div class="shops-list">'+page.map(renderListItem).join('')+'</div>';
-  } else {
-    wrap.innerHTML='<div class="shops-grid">'+page.map(renderCard).join('')+'</div>';
-  }
+  if(!page.length){wrap.innerHTML='<div class="empty-state"><div class="icon">🌿</div><h3>No shops found</h3><p>Try a different search or tag filter.</p></div>';document.getElementById('paginationWrap').innerHTML='';return;}
+  wrap.innerHTML=currentView==='list'?'<div class="shops-list">'+page.map(renderListItem).join('')+'</div>':'<div class="shops-grid">'+page.map(renderCard).join('')+'</div>';
   renderPagination(total);
 }
 
 function renderCard(s,i){
   const tags=(s.tags||[]).map(t=>`<span class="shop-tag ${TAG_COLORS[t]||''}">${t}</span>`).join('');
   const dist=s.distMi?`<span class="shop-dist">${s.distMi} mi</span>`:'';
-  const link=s.website?`<a class="shop-website" href="${s.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🌐 ${s.website.replace(/^https?:\/\//,'')}</a>`:'<span></span>';
-  return`<div class="shop-card" onclick="flyTo(${s.latitude},${s.longitude})" style="animation-delay:${i*0.04}s">
+  const host=s.website?s.website.replace(/^https?:\/\//,'').replace(/\/.*$/,''):'';
+  return`<div class="shop-card" onclick="openDrawer(${s.id})" style="animation-delay:${i*0.04}s">
     <div class="shop-card-accent"></div>
     <div class="shop-card-body">
       <div class="shop-card-top"><div class="shop-name">${s.name}</div>${dist}</div>
       <div class="shop-address">📍 ${s.address||''}${s.postcode?', '+s.postcode:''}</div>
-      <div class="shop-desc">${s.description||''}</div>
+      <div class="shop-desc-preview">${s.description||''}</div>
       <div class="shop-tags">${tags}</div>
     </div>
-    <div class="shop-card-footer">${link}
-      <button class="btn-map" onclick="event.stopPropagation();flyTo(${s.latitude},${s.longitude})">🗺 Map</button>
-    </div></div>`;
+    <div class="shop-card-footer">
+      ${s.website?`<a class="shop-website" href="${s.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${s.website}">🌐 ${host}</a>`:'<span></span>'}
+      <div class="card-footer-actions">
+        <button class="btn-map" onclick="event.stopPropagation();flyTo(${s.latitude},${s.longitude})" title="Show on map">🗺 Map</button>
+        <button class="btn-flag-card" onclick="event.stopPropagation();openFlagModal(${s.id})" title="Flag this listing">🚩</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderListItem(s,i){
   const tags=(s.tags||[]).map(t=>`<span class="sli-tag">${t}</span>`).join('');
   const dist=s.distMi?`<span class="sli-dist">${s.distMi} mi</span>`:'';
-  return`<div class="shop-list-item" onclick="flyTo(${s.latitude},${s.longitude})" style="animation-delay:${i*0.03}s">
+  return`<div class="shop-list-item" onclick="openDrawer(${s.id})" style="animation-delay:${i*0.03}s">
     <div class="sli-accent"></div>
     <div class="sli-body">
       <div class="sli-top"><div class="sli-name">${s.name}</div>${dist}</div>
@@ -459,21 +521,22 @@ function renderListItem(s,i){
     <div class="sli-right">
       ${s.website?`<a class="sli-link" href="${s.website}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🌐 Website</a>`:''}
       <button class="btn-sli-map" onclick="event.stopPropagation();flyTo(${s.latitude},${s.longitude})">🗺 Map</button>
-    </div></div>`;
+      <button class="btn-flag-card" onclick="event.stopPropagation();openFlagModal(${s.id})" title="Flag">🚩</button>
+    </div>
+  </div>`;
 }
 
 function renderPagination(total){
   const pages=Math.ceil(total/PER_PAGE);
   if(pages<=1){document.getElementById('paginationWrap').innerHTML='';return;}
-  let html='<div class="pagination">';
-  html+=`<button class="page-btn${currentPage===1?' disabled':''}" onclick="goPage(${currentPage-1})">‹</button>`;
+  let h='<div class="pagination">';
+  h+=`<button class="page-btn${currentPage===1?' disabled':''}" onclick="goPage(${currentPage-1})">&#8249;</button>`;
   for(let p=1;p<=pages;p++){
-    if(p===1||p===pages||Math.abs(p-currentPage)<=1)html+=`<button class="page-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;
-    else if(Math.abs(p-currentPage)===2)html+=`<span class="page-info">…</span>`;
+    if(p===1||p===pages||Math.abs(p-currentPage)<=1)h+=`<button class="page-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;
+    else if(Math.abs(p-currentPage)===2)h+=`<span class="page-info">…</span>`;
   }
-  html+=`<button class="page-btn${currentPage===pages?' disabled':''}" onclick="goPage(${currentPage+1})">›</button>`;
-  html+='</div>';
-  document.getElementById('paginationWrap').innerHTML=html;
+  h+=`<button class="page-btn${currentPage===pages?' disabled':''}" onclick="goPage(${currentPage+1})">&#8250;</button></div>`;
+  document.getElementById('paginationWrap').innerHTML=h;
 }
 
 function goPage(p){
@@ -485,56 +548,135 @@ function goPage(p){
   window.scrollTo({top:document.querySelector('.shops-outer').offsetTop-120,behavior:'smooth'});
 }
 
-function flyTo(lat,lng){
-  if(!lat||!lng)return;
-  setView('map');
-  fullMap.flyTo([lat,lng],15,{duration:.9});
-  document.getElementById('fullmap').scrollIntoView({behavior:'smooth',block:'center'});
-}
+function flyTo(lat,lng){if(!lat||!lng)return;setView('map');fullMap.flyTo([lat,lng],15,{duration:.9});document.getElementById('fullmap').scrollIntoView({behavior:'smooth',block:'center'});}
 
-// ── VIEW TOGGLE ──
 function setView(v){
   currentView=v;
-  ['grid','list','map'].forEach(x=>{
-    document.getElementById('btn'+x.charAt(0).toUpperCase()+x.slice(1))?.classList.toggle('active',x===v);
-  });
-  const mapEl=document.getElementById('fullmap');
-  mapEl.classList.toggle('visible',v==='map');
+  ['Grid','List','Map'].forEach(x=>document.getElementById('btn'+x)?.classList.toggle('active',x.toLowerCase()===v));
+  const m=document.getElementById('fullmap');
+  m.classList.toggle('visible',v==='map');
   if(v==='map'){fullMap.invalidateSize();plotAll(filtered);}
   renderPage();
 }
 
-// ── GEOLOCATION ──
 function locateUser(){
   if(!navigator.geolocation){alert('Geolocation not supported.');return;}
   const btn=document.querySelector('.btn-locate-bar');
-  btn.textContent='⏳ Locating…';btn.disabled=true;
+  btn.innerHTML='⏳ Locating…';btn.disabled=true;
   navigator.geolocation.getCurrentPosition(pos=>{
-    btn.textContent='📍 Near Me';btn.disabled=false;
+    btn.innerHTML='📍 Near Me';btn.disabled=false;
     userLat=pos.coords.latitude;userLng=pos.coords.longitude;
     const R=3958.8;
-    filtered=allShops.map(s=>({...s,distMi:Math.round(2*R*Math.asin(Math.sqrt(Math.sin(((s.latitude-userLat)*Math.PI/180)/2)**2+Math.cos(userLat*Math.PI/180)*Math.cos(s.latitude*Math.PI/180)*Math.sin(((s.longitude-userLng)*Math.PI/180)/2)**2))*10)/10}))
-      .sort((a,b)=>a.distMi-b.distMi);
-    document.getElementById('sortSelect').value='dist';
-    applyTagFilter();
-  },()=>{btn.textContent='📍 Near Me';btn.disabled=false;alert('Could not get location.');});
+    filtered=allShops.map(s=>({...s,distMi:Math.round(2*R*Math.asin(Math.sqrt(Math.sin(((s.latitude-userLat)*Math.PI/180)/2)**2+Math.cos(userLat*Math.PI/180)*Math.cos(s.latitude*Math.PI/180)*Math.sin(((s.longitude-userLng)*Math.PI/180)/2)**2))*10)/10})).sort((a,b)=>a.distMi-b.distMi);
+    document.getElementById('sortSelect').value='dist';applyTagFilter();
+  },()=>{btn.innerHTML='📍 Near Me';btn.disabled=false;alert('Could not get location.');});
 }
 
-// ── MODAL ──
-function openModal(){document.getElementById('modalOverlay').classList.add('open');document.getElementById('formBody').style.display='block';document.getElementById('formSuccess').style.display='none';document.body.style.overflow='hidden';}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+// DRAWER
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function infoRow(icon,label,value){return`<div class="drawer-info-row"><div class="drawer-info-icon">${icon}</div><div class="drawer-info-content"><div class="drawer-info-label">${label}</div><div class="drawer-info-value">${value}</div></div></div>`;}
+
+function openDrawer(shopId){
+  const s=allShops.find(x=>x.id===shopId);if(!s)return;
+  const tags=(s.tags||[]).map(t=>`<span class="drawer-tag">${t}</span>`).join('');
+  const dist=s.distMi?`<span class="drawer-chip">📍 ${s.distMi} mi away</span>`:'';
+  const pc=s.postcode?`<span class="drawer-chip">🏷 ${s.postcode}</span>`:'';
+  let rows='';
+  const addr=[s.address,s.postcode].filter(Boolean).join(', ');
+  if(addr)rows+=infoRow('📍','Address',escHtml(addr));
+  if(s.website)rows+=infoRow('🌐','Website',`<a href="${s.website}" target="_blank" rel="noopener">${escHtml(s.website)}</a>`);
+
+  document.getElementById('drawerBody').innerHTML=`
+    <div class="drawer-hero">
+      <div class="drawer-shop-name">${escHtml(s.name)}</div>
+      <div class="drawer-tags">${tags}</div>
+      <div class="drawer-meta-chips">${dist}${pc}</div>
+    </div>
+    ${s.description?`<div class="drawer-section"><div class="drawer-section-label">About this shop</div><div class="drawer-description">${escHtml(s.description)}</div></div>`:''}
+    <div class="drawer-section">${rows||`<span style="font-size:13px;color:var(--muted)">No contact details available.</span>`}</div>
+    ${(s.latitude&&s.longitude)?`<div class="drawer-section"><div class="drawer-section-label">Location</div><div class="drawer-mini-map" id="drawerMap"></div></div>`:''}
+  `;
+
+  const websiteBtn=s.website?`<a class="btn-drawer-website" href="${s.website}" target="_blank" rel="noopener">🌐 Visit Website</a>`:`<button class="btn-drawer-website" style="opacity:.4;cursor:default" disabled>No website listed</button>`;
+  const mapBtn=(s.latitude&&s.longitude)?`<button class="btn-drawer-map" onclick="flyToFromDrawer(${s.latitude},${s.longitude})">🗺 Show on map</button>`:'';
+  document.getElementById('drawerActions').innerHTML=`${websiteBtn}${mapBtn}<button class="btn-drawer-flag" onclick="openFlagModal(${s.id})">🚩 Flag</button>`;
+
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('shopDrawer').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  if(s.latitude&&s.longitude){
+    setTimeout(()=>{
+      if(drawerMiniMap){drawerMiniMap.remove();drawerMiniMap=null;}
+      const el=document.getElementById('drawerMap');if(!el)return;
+      drawerMiniMap=L.map(el,{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false}).setView([s.latitude,s.longitude],14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(drawerMiniMap);
+      L.marker([s.latitude,s.longitude],{icon:pinIcon()}).addTo(drawerMiniMap);
+    },220);
+  }
+}
+
+function closeDrawer(){
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('shopDrawer').classList.remove('open');
+  document.body.style.overflow='';
+  if(drawerMiniMap){drawerMiniMap.remove();drawerMiniMap=null;}
+}
+
+function flyToFromDrawer(lat,lng){closeDrawer();setTimeout(()=>flyTo(lat,lng),320);}
+
+// FLAG MODAL
+function openFlagModal(shopId){
+  flagTargetShop=allShops.find(x=>x.id===shopId)||null;if(!flagTargetShop)return;
+  document.querySelectorAll('.flag-option').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('input[name="flagReason"]').forEach(r=>r.checked=false);
+  document.getElementById('flagDetails').value='';
+  document.getElementById('flagBody').style.display='block';
+  document.getElementById('flagSuccess').style.display='none';
+  const btn=document.getElementById('flagSubmitBtn');btn.disabled=false;btn.textContent='Submit Report';
+  document.getElementById('flagOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeFlagModal(){
+  document.getElementById('flagOverlay').classList.remove('open');
+  if(!document.getElementById('shopDrawer').classList.contains('open'))document.body.style.overflow='';
+}
+function selectFlagOption(lbl){document.querySelectorAll('.flag-option').forEach(o=>o.classList.remove('selected'));lbl.classList.add('selected');}
+
+async function submitFlag(){
+  const reason=document.querySelector('input[name="flagReason"]:checked')?.value;
+  if(!reason){alert('Please select a reason.');return;}
+  if(!flagTargetShop)return;
+  const btn=document.getElementById('flagSubmitBtn');btn.disabled=true;btn.textContent='Submitting…';
+  try{
+    const{error}=await sb.from('shop_flags').insert({shop_id:flagTargetShop.id,shop_name:flagTargetShop.name,reason,details:document.getElementById('flagDetails').value.trim()||null});
+    if(error)throw error;
+    document.getElementById('flagBody').style.display='none';
+    document.getElementById('flagSuccess').style.display='block';
+  }catch(e){alert('Could not submit: '+e.message);btn.disabled=false;btn.textContent='Submit Report';}
+}
+
+// SUBMIT SHOP MODAL
+function openSubmitModal(){document.getElementById('submitFormBody').style.display='block';document.getElementById('submitSuccess').style.display='none';document.getElementById('submitOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeSubmitModal(){document.getElementById('submitOverlay').classList.remove('open');document.body.style.overflow='';}
 async function submitShop(){
-  const name=document.getElementById('f-name').value.trim();
-  const postcode=document.getElementById('f-postcode').value.trim();
+  const name=document.getElementById('f-name').value.trim();const postcode=document.getElementById('f-postcode').value.trim();
   if(!name||!postcode){alert('Please fill in shop name and postcode.');return;}
   const tags=[...document.querySelectorAll('.tcb:checked')].map(c=>c.value);
   const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Submitting…';
   try{
     const{error}=await sb.from('pending_submissions').insert({name,postcode,address:document.getElementById('f-address').value.trim()||null,website:document.getElementById('f-website').value.trim()||null,description:document.getElementById('f-desc').value.trim()||null,tags:tags.length?tags:null,submitter_email:document.getElementById('f-email').value.trim()||null});
     if(error)throw error;
-    document.getElementById('formBody').style.display='none';document.getElementById('formSuccess').style.display='block';
+    document.getElementById('submitFormBody').style.display='none';document.getElementById('submitSuccess').style.display='block';
   }catch(e){alert('Error: '+e.message);btn.disabled=false;btn.textContent='Submit for Review →';}
 }
+
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('flagOverlay').classList.contains('open'))closeFlagModal();
+  else if(document.getElementById('submitOverlay').classList.contains('open'))closeSubmitModal();
+  else if(document.getElementById('shopDrawer').classList.contains('open'))closeDrawer();
+});
 
 window.addEventListener('DOMContentLoaded',()=>{initMap();loadShops();});
 </script>
